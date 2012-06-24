@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<resources >    
+    <color name="ygo_background">#ffe6f0ff</color>
+    <color name="ygo_hilite">#ffffffff</color>
+    <color name="ygo_dark">#6456648f</color>
+    <color name="ygo_light">#64c6d4ef</color>
+    <color name="ygo_foreground">#ff000000</color>
+</resources>
