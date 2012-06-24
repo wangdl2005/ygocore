@@ -1,5 +1,7 @@
 package com.dl.ygo;
 
+import java.util.HashMap;
+
 import com.dl.ocg.CardDataC;
 import com.dl.ocg.CardString;
 import com.dl.ocg.Zone;
@@ -21,12 +23,23 @@ public class Card {
 	private String cardDesc;
 	private Bitmap cardPic;
 	private Zone cardZone;
+	private Rect rect;
 	public Bitmap getCardPic(){
 		return cardPic;
 	}
 	public Rect getRect(){
-		return cardZone.getRect();
+		CardLocation loc =getLoc();
+		if(loc == CardLocation.LOCATION_MZONE || loc == CardLocation.LOCATION_SZONE)
+		{
+			return cardZone.getRect();
+		}
+		return rect;
 	}
+	//对于Rect 与 Zone 不一样的Card都需要重新设置
+	public void setRect(Rect r){
+		this.rect = r;
+	}
+	
 	public String getName(){
 		return cardName;
 	}
@@ -52,6 +65,10 @@ public class Card {
 		return cardDesc;
 	}
 	
+	public CardLocation getLoc(){
+		return this.cardZone.getLoc();
+	}
+	
 	public void setCardZone(Zone z){
 		this.cardZone = z;
 	}
@@ -72,5 +89,10 @@ public class Card {
 		this.code = cdc.code;
 		this.dir = Direction.UP;		
 		this.cardZone = new Zone(CardLocation.LOCATION_OFFFIELD);
+	}
+	public Card(HashMap<Integer,CardDataC> cardDatas,HashMap<Integer,CardString> cardStrings
+			,HashMap<Integer,Bitmap> cardPics,int code)
+	{
+		this(cardDatas.get(code),cardStrings.get(code),cardPics.get(code));
 	}
 }

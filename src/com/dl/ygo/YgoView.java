@@ -1,5 +1,7 @@
 package com.dl.ygo;
 
+import java.util.ArrayList;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -51,7 +53,7 @@ public class YgoView extends View {
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		// TODO Auto-generated method stub		
-		Rect[] rects  = Singleton.getInstance().onTouchEvent(event);
+		ArrayList<Rect> rects  = Singleton.getInstance().onTouchEvent(event);
 		for(Rect r : rects){
 			invalidate(r);
 		}

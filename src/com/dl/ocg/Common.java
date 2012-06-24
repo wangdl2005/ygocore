@@ -725,7 +725,7 @@ public final class Common {
 			case LOCATION_EXTRA : return "额外";
 			case LOCATION_OVERLAY : return "叠放";
 		}
-		return "";
+		return "Game";
 	}
 	public static String FormatPosition(int position) {
 		CardPosition pos = CardPosition.toCardPosition(position);

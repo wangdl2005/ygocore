@@ -11,6 +11,7 @@ import com.dl.ocg.CardDataC;
 import com.dl.ocg.CardString;
 import com.dl.ocg.Zone;
 import com.dl.ocg.Common.*;
+import static com.dl.ocg.Common.*;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -24,6 +25,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.widget.Toast;
 
 public class Singleton {
 	//单态
@@ -38,9 +40,38 @@ public class Singleton {
 		bgImg = textures.get("bg");
 		bgCardImg = textures.get("bg_card");
 		coverImg = textures.get("cover");
-		cardOnShow = new Card(cardDatas.get(1), cardStrings.get(1),cardPics.get(1),zone_on_show);
+		//button
+		btn_dp = new MyButton(rect_dp,textures.get("dp"));
+		btn_sp = new MyButton(rect_sp,textures.get("sp"));
+		btn_m1 = new MyButton(rect_m1,textures.get("m1"));
+		btn_bp = new MyButton(rect_bp,textures.get("bp"));
+		btn_m2 = new MyButton(rect_m2,textures.get("m2"));
+		btn_ep = new MyButton(rect_ep,textures.get("ep"));
+		btn_coin = new MyButton(rect_coin,textures.get("coin"));
+		btn_dice = new MyButton(rect_dice,textures.get("dice"));
+		btn_token = new MyButton(rect_token,textures.get("token"));
+		btn_lp = new MyButton(rect_lp,textures.get("lp"));
+		btn_endTurn = new MyButton(rect_endTurn,textures.get("endTurn"));
+		buttons.add(btn_dp);
+		buttons.add(btn_sp);
+		buttons.add(btn_m1);
+		buttons.add(btn_bp);
+		buttons.add(btn_m2);
+		buttons.add(btn_ep);
+		buttons.add(btn_coin);
+		buttons.add(btn_dice);
+		buttons.add(btn_token);
+		buttons.add(btn_lp);
+		buttons.add(btn_endTurn);
+		//player 		
+		CardGroup emptyCardGroup = new CardGroup(0);
+		player00 = new Player(LP_MAX, false, emptyCardGroup, emptyCardGroup
+				, emptyCardGroup, emptyCardGroup, emptyCardGroup, emptyCardGroup, emptyCardGroup);
+		player01 = new Player(LP_MAX, false, emptyCardGroup, emptyCardGroup
+				, emptyCardGroup, emptyCardGroup, emptyCardGroup, emptyCardGroup, emptyCardGroup);
 		initialCardGroup();
 		test();
+
 	}
 	public static synchronized Singleton getInstance(){
 		if(instance == null){
@@ -49,21 +80,6 @@ public class Singleton {
 		return instance;
 	}
 	//
-	private CardGroup cardsHandPlayer00;
-	private CardGroup cardsSTPlayer00;
-	private CardGroup cardsMZONEPlayer00;
-	private CardGroup cardsDeckPlayer00;
-	private CardGroup cardsGravePlayer00;
-	private CardGroup cardsExtraPlayer00;
-	private CardGroup cardsBanishPlayer00;
-	private CardGroup cardsHandPlayer01;	
-	private CardGroup cardsSTPlayer01;
-	private CardGroup cardsMZONEPlayer01;
-	private CardGroup cardsDeckPlayer01;
-	private CardGroup cardsGravePlayer01;
-	private CardGroup cardsExtraPlayer01;
-	private CardGroup cardsBanishPlayer01;
-	
 	private Player player00;
 	private Player player01;
 	private Card cardOnShow;
@@ -75,6 +91,7 @@ public class Singleton {
 	
 	private Paint pen;
 	private Context context;
+	private String message = "";
 	//card data
 	private HashMap<String,Bitmap> textures = new HashMap<String, Bitmap>();
 	private HashMap<Integer,Bitmap> cardPics = new HashMap<Integer, Bitmap>();
@@ -95,6 +112,7 @@ public class Singleton {
 	private static final int CARD_HAND_MAX_SIZE = 75;
 	private static final int smallCardWidth = 38;
 	private static final int smallCardHeight = 54;
+	private static final int LP_MAX = 8000;
 	//坐标，区域
 	/* 1_hand ...
 	 * 1_deck    1_szone_4 1_szone_3 1_szone_2 1_szone_1 1_szone_0 1_extra
@@ -143,7 +161,36 @@ public class Singleton {
 	
 	private Rect rect_all = new Rect();
 	private Rect rect_desc = new Rect();
+	//按钮区域
+	private Rect rect_dp=new Rect();
+	private Rect rect_sp =new Rect();
+	private Rect rect_m1 =new Rect();
+	private Rect rect_bp =new Rect();
+	private Rect rect_m2 =new Rect();
+	private Rect rect_ep =new Rect();
+	
+	private Rect rect_dice =new Rect();
+	private Rect rect_coin =new Rect();
+	private Rect rect_token =new Rect();
+	private Rect rect_lp =new Rect();
+	private Rect rect_endTurn =new Rect();
+	
+	
+	private MyButton btn_dp;
+	private MyButton btn_sp ;
+	private MyButton btn_m1 ;
+	private MyButton btn_bp ;
+	private MyButton btn_m2 ;
+	private MyButton btn_ep ;
+	
+	private MyButton btn_dice ;
+	private MyButton btn_coin ;
+	private MyButton btn_token ;
+	private MyButton btn_lp ;
+	private MyButton btn_endTurn ;
 
+	private ArrayList<MyButton> buttons = new ArrayList<MyButton>();
+	
 	private void readData(){
 		readDatabase();
 		readStrings();
@@ -215,7 +262,6 @@ public class Singleton {
 				}catch(Exception ex)
 				{}
 			}
-			
 		}
 		Log.d(TAG,"end strings.conf");
 	}
@@ -331,13 +377,72 @@ public class Singleton {
 		zones.add(zone_1_hand);
 		
 		rect_all.set(0, 0, 800, 442);
-		rect_desc.set(3,230, 163, 380);
+		rect_desc.set(3,230, 163, 442);
+		rect_dp.set(212,182,270,220);
+		rect_sp.set(270,182,328,220);
+		rect_m1.set(328,182,386,220);
+		rect_bp.set(386,182,444,220);
+		rect_m2.set(444,182,502,220);
+		rect_ep.set(502,182,560,220);
+		rect_coin.set(230,220,267,257);
+		rect_dice.set(280,220,317,257);
+		rect_token.set(338,220,375,257);
+		rect_lp.set(396,220,456,257);
+		rect_endTurn.set(480,220,560,257);
 	}	
 	//get card return null if there is not a card
 	private Card getCard(float x,float y){
 		Card c = null;
 		//TODO test
-		c = new Card(cardDatas.get(135598), cardStrings.get(135598), cardPics.get(135598));		
+		CardLocation cL = getLocation(x,y);
+		if(cL == CardLocation.LOCATION_MZONE){
+			for(Card card : player00.getCardsMZONE().getCards()){
+				if(card.getRect().contains((int)x,(int) y))
+				{
+					c = card;
+					break;
+				}
+			}
+			for(Card card : player01.getCardsMZONE().getCards()){
+				if(card.getRect().contains((int)x,(int) y))
+				{
+					c = card;
+					break;
+				}
+			}
+		}
+		if(cL == CardLocation.LOCATION_SZONE){
+			for(Card card : player00.getCardsST().getCards()){
+				if(card.getRect().contains((int)x,(int) y))
+				{
+					c = card;
+					break;
+				}
+			}
+			for(Card card : player01.getCardsST().getCards()){
+				if(card.getRect().contains((int)x,(int) y))
+				{
+					c = card;
+					break;
+				}
+			}
+		}
+		if(cL == CardLocation.LOCATION_HAND){
+			for(Card card : player00.getCardsHand().getCards()){
+				if(card.getRect().contains((int)x,(int) y))
+				{
+					c = card;
+					break;
+				}
+			}
+			for(Card card : player01.getCardsHand().getCards()){
+				if(card.getRect().contains((int)x,(int) y))
+				{
+					c = card;
+					break;
+				}
+			}
+		}
 		return c;
 	}
 	//get loc
@@ -352,16 +457,16 @@ public class Singleton {
 		return loc;
 	}
 	//get rect return null if no matches
-	private Rect getRect(float x,float y){
-		Rect tmp = null;
-		for(Zone z : zones){
-			if(z.getRect().contains((int)x,(int)y)){
-				tmp = z.getRect();
-				break;
-			}
-		}
-		return tmp;
-	}
+//	private Rect getRect(float x,float y){
+//		Rect tmp = null;
+//		for(Zone z : zones){
+//			if(z.getRect().contains((int)x,(int)y)){
+//				tmp = z.getRect();
+//				break;
+//			}
+//		}
+//		return tmp;
+//	}
 	//rotate
 	private Rect rotate(Rect rect){
 		int l = rect.left;
@@ -374,92 +479,116 @@ public class Singleton {
 	}
 	
 	private void test(){
-		Card c1 = new Card(cardDatas.get(1), cardStrings.get(1), cardPics.get(1));
-		Card c131182 = new Card(cardDatas.get(131182), cardStrings.get(131182), cardPics.get(131182));
-		Card c135598 = new Card(cardDatas.get(135598), cardStrings.get(135598), cardPics.get(135598));
-		Card c168917 = new Card(cardDatas.get(168917), cardStrings.get(168917), cardPics.get(168917));
-		Card c176392 = new Card(cardDatas.get(176392), cardStrings.get(176392), cardPics.get(176392));
-		Card c191749 = new Card(cardDatas.get(191749), cardStrings.get(191749), cardPics.get(191749));
-		Card c218704 = new Card(cardDatas.get(218704), cardStrings.get(218704), cardPics.get(218704));
-		Card c27551 = new Card(cardDatas.get(27551), cardStrings.get(27551), cardPics.get(27551));
-		Card c50755 = new Card(cardDatas.get(50755), cardStrings.get(50755), cardPics.get(50755));
+		Card c1 = new Card(cardDatas,cardStrings,cardPics,1);
+		Card c2 =new Card(cardDatas,cardStrings,cardPics,131182);
+		Card c3 = new Card(cardDatas,cardStrings,cardPics,135598);
+		Card c4 =new Card(cardDatas,cardStrings,cardPics,168917);
+		Card c5 = new Card(cardDatas,cardStrings,cardPics,176392);
+		Card c6 = new Card(cardDatas,cardStrings,cardPics,191749);
+		Card c7 = new Card(cardDatas,cardStrings,cardPics,218704);
+		Card c8 =new Card(cardDatas,cardStrings,cardPics,27551);
+		Card c9 = new Card(cardDatas,cardStrings,cardPics,50755);
+		Card c10 = new Card(cardDatas,cardStrings,cardPics,135598);
+		Card c11 =new Card(cardDatas,cardStrings,cardPics,168917);
+		Card c12 = new Card(cardDatas,cardStrings,cardPics,176392);
+		Card c13 = new Card(cardDatas,cardStrings,cardPics,191749);
+		Card c14 = new Card(cardDatas,cardStrings,cardPics,218704);
+		Card c15 =new Card(cardDatas,cardStrings,cardPics,27551);
+		Card c16 = new Card(cardDatas,cardStrings,cardPics,50755);
+		Card c17 =new Card(cardDatas,cardStrings,cardPics,168917);
+		Card c18 = new Card(cardDatas,cardStrings,cardPics,176392);
 		
 		c1.setCardZone(zone_0_remove);
-		cardsBanishPlayer00.addCard(c1);
+		player00.getCardsBanish().addCard(c1);
 		
-		c131182.setCardZone(zone_0_deck);
-		c176392.setCardZone(zone_0_deck);
-		c218704.setCardZone(zone_0_deck);
-		c27551.setCardZone(zone_0_deck);
-		cardsDeckPlayer00.addCard(c131182);
-		cardsDeckPlayer00.addCard(c176392);
-		cardsDeckPlayer00.addCard(c218704);
-		cardsDeckPlayer00.addCard(c27551);
+		c2.setCardZone(zone_0_deck);
+		c3.setCardZone(zone_0_deck);
+		c4.setCardZone(zone_0_deck);
+		c5.setCardZone(zone_0_deck);
+		player00.getCardsDeck().addCard(c2);
+		player00.getCardsDeck().addCard(c3);
+		player00.getCardsDeck().addCard(c4);
+		player00.getCardsDeck().addCard(c5);
 		
-		c176392.setCardZone(zone_0_hand);
-		c218704.setCardZone(zone_0_hand);
-		c27551.setCardZone(zone_0_hand);
-		cardsHandPlayer00.addCard(c176392);
-		cardsHandPlayer00.addCard(c218704);
-		cardsHandPlayer00.addCard(c27551);
+		c6.setCardZone(zone_0_hand);
+		c7.setCardZone(zone_0_hand);
+		c8.setCardZone(zone_0_hand);
+		player00.getCardsHand().addCard(c6);
+		player00.getCardsHand().addCard(c7);
+		player00.getCardsHand().addCard(c8);
 		
-		c135598.setCardZone(zone_0_mzone_2);
-		cardsMZONEPlayer00.addCard(c135598);
+		c9.setCardZone(zone_0_mzone_2);
+		player00.getCardsMZONE().addCard(c9);
 		
-		c50755.setCardZone(zone_0_szone_1);
-		cardsMZONEPlayer00.addCard(c50755);
+		c10.setCardZone(zone_0_szone_1);
+		player00.getCardsST().addCard(c10);
 		
-		c27551.setCardZone(zone_0_extra);
-		cardsExtraPlayer00.addCard(c27551);
+		c11.setCardZone(zone_0_extra);
+		player00.getCardsExtra().addCard(c11);
 		
-		c27551.setCardZone(zone_0_szone_5);
-		cardsSTPlayer00.addCard(c27551);
+		c12.setCardZone(zone_0_szone_5);
+		player00.getCardsST().addCard(c12);
 		
-		c191749.setCardZone(zone_1_extra);
-		cardsExtraPlayer01.addCard(c191749);
+		c13.setCardZone(zone_1_extra);
+		player01.getCardsExtra().addCard(c13);
 		
-		c168917.setCardZone(zone_1_grave);
-		cardsGravePlayer01.addCard(c168917);
+		c14.setCardZone(zone_1_grave);
+		player01.getCardsGrave().addCard(c14);
 		
-		c168917.setCardZone(zone_1_hand);
-		cardsHandPlayer01.addCard(c168917);
-		cardsHandPlayer01.addCard(c168917);
-		cardsHandPlayer01.addCard(c168917);
-		cardsHandPlayer01.addCard(c168917);
-		cardsHandPlayer01.addCard(c168917);
-		cardsHandPlayer01.addCard(c168917);
-		cardsHandPlayer01.addCard(c168917);
-		cardsHandPlayer01.addCard(c168917);
-		cardsHandPlayer01.addCard(c168917);
-		cardsHandPlayer01.addCard(c168917);
+		c15.setCardZone(zone_1_hand);
+		player01.getCardsHand().addCard(c15);
+		c17.setCardZone(zone_1_hand);
+		player01.getCardsHand().addCard(c17);
+		c16.setCardZone(zone_1_hand);
+		player01.getCardsHand().addCard(c16);
+		c18.setCardZone(zone_1_hand);
+		player01.getCardsHand().addCard(c18);
 	}
 	//inital
 	public void initialCardGroup(){
 		
-		cardsBanishPlayer00 = new CardGroup(CARD_BANISH_MAX_SIZE );
-		cardsDeckPlayer00 = new CardGroup(CARD_DECK_MAX_SIZE );
-		cardsExtraPlayer00 = new CardGroup(CARD_EXTRA_MAX_SIZE );
-		cardsGravePlayer00 = new CardGroup(CARD_GRAVE_MAX_SIZE );
-		cardsHandPlayer00 = new CardGroup(CARD_HAND_MAX_SIZE );
-		cardsMZONEPlayer00 = new CardGroup(CARD_MZONE_MAXSIZE );
-		cardsSTPlayer00 = new CardGroup(CARD_SZONE_MAXSIZE );;
+		player00.setCardsBanish(new CardGroup(CARD_BANISH_MAX_SIZE ));
+		player00.setCardsDeck( new CardGroup(CARD_DECK_MAX_SIZE ));
+		player00.setCardsExtra( new CardGroup(CARD_EXTRA_MAX_SIZE ));
+		player00.setCardsGrave( new CardGroup(CARD_GRAVE_MAX_SIZE ));
+		player00.setCardsHand( new CardGroup(CARD_HAND_MAX_SIZE ));
+		player00.setCardsMZONE( new CardGroup(CARD_MZONE_MAXSIZE ));
+		player00.setCardsST( new CardGroup(CARD_SZONE_MAXSIZE ));;
 		
-		cardsBanishPlayer01 = new CardGroup(CARD_BANISH_MAX_SIZE );
-		cardsDeckPlayer01 = new CardGroup(CARD_DECK_MAX_SIZE );
-		cardsExtraPlayer01 = new CardGroup(CARD_EXTRA_MAX_SIZE );
-		cardsGravePlayer01 = new CardGroup(CARD_GRAVE_MAX_SIZE );
-		cardsHandPlayer01 = new CardGroup(CARD_HAND_MAX_SIZE );
-		cardsMZONEPlayer01 = new CardGroup(CARD_MZONE_MAXSIZE );
-		cardsSTPlayer01 = new CardGroup(CARD_SZONE_MAXSIZE );
+		player01.setCardsBanish( new CardGroup(CARD_BANISH_MAX_SIZE ));
+		player01.setCardsDeck( new CardGroup(CARD_DECK_MAX_SIZE ));
+		player01.setCardsExtra( new CardGroup(CARD_EXTRA_MAX_SIZE ));
+		player01.setCardsGrave( new CardGroup(CARD_GRAVE_MAX_SIZE ));
+		player01.setCardsHand( new CardGroup(CARD_HAND_MAX_SIZE ));
+		player01.setCardsMZONE( new CardGroup(CARD_MZONE_MAXSIZE ));
+		player01.setCardsST( new CardGroup(CARD_SZONE_MAXSIZE ));
 	}
 	
 	//onTouch
-	public Rect[] onTouchEvent(MotionEvent event){
+	public ArrayList<Rect> onTouchEvent(MotionEvent event){
 		float selX = event.getX();
 		float selY = event.getY();
 		cardOnShow = getCard(selX,selY);
-		cardOnShow.setCardZone(zone_on_show);
-		return new Rect[]{zone_on_show.getRect(),rect_desc};
+		
+		//button
+		for(MyButton btn : buttons){
+			if(btn.getRect().contains((int)selX, (int)selY)){
+				//button work
+				message = btn.toString() + " is working";
+				break;
+			}
+			else
+			{
+				message = "";
+			}
+		}
+		ArrayList<Rect> rectInvaliate = new ArrayList<Rect>();
+		rectInvaliate.add(rect_desc);
+		rectInvaliate.add(zone_on_show.getRect());
+		//button
+		rectInvaliate.add(new Rect(626, 75,	876, 90));
+		
+		return rectInvaliate;
 	}
 	
 	//draw
@@ -470,7 +599,7 @@ public class Singleton {
 		canvas.drawBitmap(bgCardImg, null,rect_all, pen);
 		//draw cardOnShow		
 		if(cardOnShow!=null){
-			canvas.drawBitmap(cardOnShow.getCardPic(), null, cardOnShow.getRect(), pen);
+			canvas.drawBitmap(cardOnShow.getCardPic(), null, zone_on_show.getRect(), pen);
 		}
 		else
 		{						
@@ -478,111 +607,121 @@ public class Singleton {
 			canvas.drawBitmap(coverImg,null,zone_on_show.getRect(), pen);
 		}
 		//draw desc
-	    String name = cardOnShow.getName();
-	    String attr = cardOnShow.getAttr();
-	    int level =cardOnShow.getLevel();
-	    int atk = cardOnShow.getAttack();
-	    int def = cardOnShow.getDefence();
-	    String race = cardOnShow.getRace();
-	    String desc = cardOnShow.getDesc();
-	    String text = null;
-	    TextUtil txtUtil = null;
-	    //name
-	    Log.d(TAG,"name:"+name);
-	    text = name;
-	    txtUtil = new TextUtil(text, 5, 250,	150, 20, Color.WHITE, Color.BLACK, 0, 15);
-	    txtUtil.InitText();
-	    txtUtil.DrawText(canvas);
-	    //attr
-	    text = attr + "  LV:" + level + "  ATK:" + atk + " /DEF:" + def;
-	    Log.d(TAG,"attr:"+text);
-	    txtUtil = new TextUtil(text, 5, 270, 150, 15, Color.WHITE, Color.BLACK, 0, 10);
-	    txtUtil.InitText();
-	    txtUtil.DrawText(canvas);
-	    //race
-	    text = "[" + race + "]";
-	    Log.d(TAG,"race:"+race);
-	    txtUtil = new TextUtil(text, 5, 285, 150, 15, Color.WHITE, Color.BLACK, 0, 10);
-	    txtUtil.InitText();
-	    txtUtil.DrawText(canvas);
-	    //counter
-	    //TODO
-	    //desc
-	    text = "描述";
-	    txtUtil = new TextUtil(text, 5, 325, 150, 15, Color.WHITE, Color.BLACK, 0, 10);
-	    txtUtil.InitText();
-	    txtUtil.DrawText(canvas);
-	    text = desc;
-	    Log.d(TAG,"desc:"+desc);
-	    txtUtil = new TextUtil(text, 5, 340, 150, 100, Color.WHITE, Color.BLACK, 0, 10);
-	    txtUtil.InitText();
-	    txtUtil.DrawText(canvas);
+		if(cardOnShow!=null)
+		{
+		    String name = cardOnShow.getName();
+		    String attr = cardOnShow.getAttr();
+		    int level =cardOnShow.getLevel();
+		    int atk = cardOnShow.getAttack();
+		    int def = cardOnShow.getDefence();
+		    String race = cardOnShow.getRace();
+		    String desc = cardOnShow.getDesc();
+		    String loc = FormatLocation(cardOnShow.getLoc().getValue());
+		    String text = null;
+		    TextUtil txtUtil = null;
+		    //name
+		    Log.d(TAG,"name:"+name);
+		    text = name;
+		    txtUtil = new TextUtil(text, 5, 250,	150, 20, Color.WHITE, Color.BLACK, 0, 15);
+		    txtUtil.InitText();
+		    txtUtil.DrawText(canvas);
+		    //attr
+		    text = attr + "  LV:" + level + "  ATK:" + atk + " /DEF:" + def;
+		    Log.d(TAG,"attr:"+text);
+		    txtUtil = new TextUtil(text, 5, 270, 150, 15, Color.WHITE, Color.BLACK, 0, 10);
+		    txtUtil.InitText();
+		    txtUtil.DrawText(canvas);
+		    //race
+		    text = "[" + race + "]";
+		    Log.d(TAG,"race:"+race);
+		    txtUtil = new TextUtil(text, 5, 285, 150, 15, Color.WHITE, Color.BLACK, 0, 10);
+		    txtUtil.InitText();
+		    txtUtil.DrawText(canvas);
+		    //位置，counter
+		    //TODO 原拥有者
+		    text = "位置: " + loc + "    原拥有者:"+"Player00";
+		    Log.d(TAG,"位置:"+text);
+		    txtUtil = new TextUtil(text, 5, 300, 150, 15, Color.WHITE, Color.BLACK, 0, 10);
+		    txtUtil.InitText();
+		    txtUtil.DrawText(canvas);
+		    //TODO counter
+		    //desc
+		    text = "描述";
+		    txtUtil = new TextUtil(text, 5, 330, 150, 15, Color.WHITE, Color.BLACK, 0, 10);
+		    txtUtil.InitText();
+		    txtUtil.DrawText(canvas);
+		    text = desc;
+		    Log.d(TAG,"desc:"+desc);
+		    txtUtil = new TextUtil(text, 5, 345, 150, 100, Color.WHITE, Color.BLACK, 0, 10);
+		    txtUtil.InitText();
+		    txtUtil.DrawText(canvas);
+		}
 	    //EXTRA
-	    if(cardsExtraPlayer00!=null &&cardsExtraPlayer01!=null){
-	    	if(cardsExtraPlayer00.getCount() > 0){
+	    if(player00.getCardsExtra()!=null &&player01.getCardsExtra()!=null){
+	    	if(player00.getCardsExtra().getCount() > 0){
 	    		canvas.drawBitmap(coverImg, null, zone_0_extra.getRect(), pen);
 	    	}
-	    	if(cardsExtraPlayer01.getCount() > 0){
+	    	if(player01.getCardsExtra().getCount() > 0){
 	    		canvas.drawBitmap(coverImg, null, zone_1_extra.getRect(), pen);
 	    	}
 	    }
 	    //GRAVE
-	    if(cardsGravePlayer00!=null &&cardsGravePlayer01!=null){
-	    	if(cardsGravePlayer00.getCount() > 0){
-	    		canvas.drawBitmap(cardsGravePlayer00.getLastCard().getCardPic(), null, zone_0_grave.getRect(), pen);
+	    if(player00.getCardsGrave()!=null &&player01.getCardsGrave()!=null){
+	    	if(player00.getCardsGrave().getCount() > 0){
+	    		canvas.drawBitmap(player00.getCardsGrave().getLastCard().getCardPic(), null, zone_0_grave.getRect(), pen);
 	    	}
-	    	if(cardsGravePlayer01.getCount() > 0){
-	    		canvas.drawBitmap(cardsGravePlayer01.getLastCard().getCardPic(), null, zone_1_grave.getRect(), pen);
+	    	if(player01.getCardsGrave().getCount() > 0){
+	    		canvas.drawBitmap(player01.getCardsGrave().getLastCard().getCardPic(), null, zone_1_grave.getRect(), pen);
 	    	}
 	    }
 	    //DECK
-	    if(cardsDeckPlayer00!=null &&cardsDeckPlayer01!=null){
-	    	if(cardsDeckPlayer00.getCount() > 0){
+	    if(player00.getCardsDeck()!=null &&player01.getCardsDeck()!=null){
+	    	if(player00.getCardsDeck().getCount() > 0){
 	    		canvas.drawBitmap(coverImg, null, zone_0_deck.getRect(), pen);
 	    	}
-	    	if(cardsDeckPlayer01.getCount() > 0){
+	    	if(player01.getCardsDeck().getCount() > 0){
 	    		canvas.drawBitmap(coverImg, null, zone_1_deck.getRect(), pen);
 	    	}
 	    }
 	    //REMOVE BANNISH
-	    if(cardsBanishPlayer00!=null &&cardsBanishPlayer01!=null){
-	    	if(cardsBanishPlayer00.getCount() > 0){
-	    		canvas.drawBitmap(coverImg, null, zone_0_remove.getRect(), pen);
+	    if(player00.getCardsBanish()!=null &&player01.getCardsBanish()!=null){
+	    	if(player00.getCardsBanish().getCount() > 0){
+	    		canvas.drawBitmap(player00.getCardsBanish().getLastCard().getCardPic(), null, zone_0_remove.getRect(), pen);
 	    	}
-	    	if(cardsBanishPlayer01.getCount() > 0){
-	    		canvas.drawBitmap(coverImg, null, zone_1_remove.getRect(), pen);
+	    	if(player01.getCardsBanish().getCount() > 0){
+	    		canvas.drawBitmap(player01.getCardsBanish().getLastCard().getCardPic(), null, zone_1_remove.getRect(), pen);
 	    	}
 	    }
 	    //MZONE
-	    if(cardsMZONEPlayer00!=null &&cardsMZONEPlayer01!=null){
-	    	if(cardsMZONEPlayer00.getCount() > 0){
-	    		for(Card c : cardsMZONEPlayer00.getCards()){
+	    if(player00.getCardsMZONE()!=null &&player01.getCardsMZONE()!=null){
+	    	if(player00.getCardsMZONE().getCount() > 0){
+	    		for(Card c : player00.getCardsMZONE().getCards()){
 	    			canvas.drawBitmap(c.getCardPic(), null, c.getRect(), pen);
 	    		}
 	    	}
-	    	if(cardsMZONEPlayer01.getCount() > 0){
-	    		for(Card c : cardsMZONEPlayer01.getCards()){
+	    	if(player01.getCardsMZONE().getCount() > 0){
+	    		for(Card c : player01.getCardsMZONE().getCards()){
 	    			canvas.drawBitmap(c.getCardPic(), null, c.getRect(), pen);
 	    		}
 	    	}
 	    }
 	    //SZONE
-	    if(cardsSTPlayer00!=null &&cardsSTPlayer01!=null){
-	    	if(cardsSTPlayer00.getCount() > 0){
-	    		for(Card c : cardsSTPlayer00.getCards()){
+	    if(player00.getCardsST()!=null &&player01.getCardsST()!=null){
+	    	if(player00.getCardsST().getCount() > 0){
+	    		for(Card c : player00.getCardsST().getCards()){
 	    			canvas.drawBitmap(c.getCardPic(), null, c.getRect(), pen);
 	    		}
 	    	}
-	    	if(cardsSTPlayer01.getCount() > 0){
-	    		for(Card c : cardsSTPlayer00.getCards()){
+	    	if(player01.getCardsST().getCount() > 0){
+	    		for(Card c : player01.getCardsST().getCards()){
 	    			canvas.drawBitmap(c.getCardPic(), null, c.getRect(), pen);
 	    		}
 	    	}
 	    }
 	    //Hand
-	    if(cardsHandPlayer00!=null &&cardsHandPlayer01!=null){
-	    	int n00 = cardsHandPlayer00.getCount() ;
-	    	int n01= cardsHandPlayer01.getCount();
+	    if(player00.getCardsHand()!=null &&player01.getCardsHand()!=null){
+	    	int n00 = player00.getCardsHand().getCount() ;
+	    	int n01= player01.getCardsHand().getCount();
 	    	if(n00> 0){	    		
 	    		int left = zone_0_hand.getRect().left;
 	    		int top = zone_0_hand.getRect().top;
@@ -593,8 +732,17 @@ public class Singleton {
 	    			seam = smallCardWidth +1;
 	    		}
 	    		int i = left;
-	    		for(Card c : cardsHandPlayer00.getCards()){
+	    		int n = 0;
+	    		for(Card c : player00.getCardsHand().getCards()){
+	    			++n;
 	    			canvas.drawBitmap(c.getCardPic(), null,new Rect(i, top, i + smallCardWidth, bottom), pen);
+	    			if(n < n00){
+	    				c.setRect(new Rect(i,top,i + seam-1, bottom));	    			
+	    			}
+	    			else
+	    			{
+	    				c.setRect(new Rect(i,top,i + smallCardWidth, bottom));	    
+	    			}
 	    			 i += seam;
 	    		}
 	    	}
@@ -608,11 +756,43 @@ public class Singleton {
 	    			seam = smallCardWidth +1;
 	    		}
 	    		int i = right;
-	    		for(Card c : cardsHandPlayer01.getCards()){
+	    		int n = 0;
+	    		for(Card c : player01.getCardsHand().getCards()){
+	    			++n;
 	    			canvas.drawBitmap(c.getCardPic(), null,new Rect(i - smallCardWidth, top, i  , bottom), pen);
+	    			if(n < n01){
+	    				c.setRect(new Rect(i - seam + 1,top,i, bottom));	    			
+	    			}
+	    			else
+	    			{
+	    				c.setRect(new Rect(i -smallCardWidth ,top,i, bottom));	    
+	    			}
 	    			 i -= seam;
 	    		}
 	    	}
 	    }    
+	    
+	    //button
+	    canvas.drawBitmap(btn_dp.getBmp(), null, btn_dp.getRect(), pen);
+	    canvas.drawBitmap(btn_sp.getBmp(), null, btn_sp.getRect(), pen);
+	    canvas.drawBitmap(btn_m1.getBmp(), null, btn_m1.getRect(), pen);
+	    canvas.drawBitmap(btn_bp.getBmp(), null, btn_bp.getRect(), pen);
+	    canvas.drawBitmap(btn_m2.getBmp(), null, btn_m2.getRect(), pen);
+	    canvas.drawBitmap(btn_ep.getBmp(), null, btn_ep.getRect(), pen);
+	    canvas.drawBitmap(btn_coin.getBmp(), null, btn_coin.getRect(), pen);
+	    canvas.drawBitmap(btn_dice.getBmp(), null, btn_dice.getRect(), pen);
+	    canvas.drawBitmap(btn_token.getBmp(), null, btn_token.getRect(), pen);
+	    canvas.drawBitmap(btn_lp.getBmp(), null, btn_lp.getRect(), pen);
+	    canvas.drawBitmap(btn_endTurn.getBmp(), null, btn_endTurn.getRect(), pen);  
+	    
+	    //draw message
+	    TextUtil txtUtil = null;
+	    Log.d(TAG,"message:"+message);
+	    txtUtil = new TextUtil(message, 626, 75,	150, 60, Color.WHITE, Color.BLACK, 0, 20);
+	    txtUtil.InitText();
+	    txtUtil.DrawText(canvas);
 	}
+	
+
+	
 }
