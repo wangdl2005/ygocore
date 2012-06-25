@@ -6,16 +6,21 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import com.dl.ocg.CardDataC;
 import com.dl.ocg.CardString;
 import com.dl.ocg.Zone;
 import com.dl.ocg.Common.*;
+import com.dl.ygo.R.drawable;
+
 import static com.dl.ocg.Common.*;
 
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
@@ -25,23 +30,79 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Handler;
+import android.os.Message;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
+import android.view.View.OnTouchListener;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class Singleton {
 	//单态
 	private static Singleton instance = null;
-	private Singleton(Context context){
-		this.context = context;
+
+	private Timer timer = new Timer(); 
+	private Handler handler = new Handler(){ 
+		public void handleMessage(Message msg) { 
+				switch (msg.what) { 
+					case 1: 
+					{
+						if(cardOnShow != null)
+						{
+							String name = cardOnShow.getName();
+						    String attr = cardOnShow.getAttr();
+						    int level =cardOnShow.getLevel();
+						    int atk = cardOnShow.getAttack();
+						    int def = cardOnShow.getDefence();
+						    String race = cardOnShow.getRace();
+						    String desc = cardOnShow.getDesc();
+						    String loc = FormatLocation(cardOnShow.getLoc().getValue());
+							StringBuilder text = new StringBuilder();
+							text.append(name + "\n");
+							text.append(attr + "  LV:" + level + "  ATK:" + atk + " /DEF:" + def + "\n");
+							text.append("[" + race + "]" + "\n");
+							text.append("位置: " + loc + "    原拥有者:"+"Player00" + "\n");
+							//TODO
+							text.append("\n");
+							text.append("描述:\n");
+							text.append(desc);
+							if(view != null){
+								TextView txtDesc = (TextView) view.findViewById(R.id.txtDesc);
+								txtDesc.setText(text);
+							}
+						}
+						
+						TextView txtMessage =(TextView) view.findViewById(R.id.txtMessage);
+						txtMessage.setText(message);
+						break; 
+					}
+				} 
+			super.handleMessage(msg); 
+			} 
+	};
+	private TimerTask task = new TimerTask() {
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
+			Message message = new Message(); 
+			message.what = 1; 
+			handler.sendMessage(message); 	
+		}
+	};
+	private Singleton(View  view){
+		this.context = view.getContext();
+		this.view = view;
 		init();
 	}
-	public static synchronized Singleton getInstance(Context context){
+	public static synchronized Singleton getInstance(View view){
 		if(instance == null){
-			instance = new Singleton(context);
+			instance = new Singleton(view);
 		}	
-		instance.context = context;
 		return instance;
 	}
 	private void init() {
@@ -85,8 +146,11 @@ public class Singleton {
 		cardOnShow = new Card(cardDatas, cardStrings, cardPics, 1);
 		initialCardGroup();
 		test();
-
+		//timer.schedule(task,0,100);
 	}
+	//View
+	private View view;
+	
 	//
 	private Player player00;
 	private Player player01;
@@ -169,6 +233,7 @@ public class Singleton {
 	
 	private Rect rect_all = new Rect();
 	private Rect rect_desc = new Rect();
+	private Rect rect_message = new Rect();
 	//按钮区域
 	private Rect rect_dp=new Rect();
 	private Rect rect_sp =new Rect();
@@ -387,7 +452,9 @@ public class Singleton {
 		zones.add(zone_1_hand);
 		
 		rect_all.set(0, 0, 800, 442);
-		rect_desc.set(3,230, 163, 442);
+		rect_desc.set(3,245, 163, 442);
+		rect_message.set(618,93,793,315);
+		
 		rect_dp.set(212,182,270,220);
 		rect_sp.set(270,182,328,220);
 		rect_m1.set(328,182,386,220);
@@ -617,45 +684,45 @@ public class Singleton {
 		    {
 					cardOnShow = getCard(selX,selY);
 					
-					//button
-					if(btn_lp.getRect().contains((int)selX, (int)selY))
-					{
-						AlertDialog.Builder dlg = new AlertDialog.Builder(context);
-						final EditText editText =  new EditText(context);
-						editText.setId(100);
-						dlg.setTitle("LP:").setIcon(
-							     android.R.drawable.ic_dialog_info).setView(editText).setPositiveButton("确定", new DialogInterface.OnClickListener() {
-									
-									@Override
-									public void onClick(DialogInterface dialog, int which) {
-										// TODO Auto-generated method stub
-										String text = editText.getText().toString();
-										try{
-											int i = 0;
-											i = Integer.parseInt(text);
-											player00.setLP(player00.getLP() + i);
-											rectInvaliate.add(player00.getLpRect());
-										}
-										catch (NumberFormatException e) {
-											e.printStackTrace();
-										}
-										Log.d("YGO",text);
-									}
-								}
-							    		 )
-							     .setNegativeButton("取消", null).show();	
-					}
-					for(MyButton btn : buttons){
-						if(btn.getRect().contains((int)selX, (int)selY)){
-							//button work
-							message = btn.toString() + " is working";
-							break;
-						}
-						else
-						{
-							message = "";
-						}
-					}
+//					//button
+//					if(btn_lp.getRect().contains((int)selX, (int)selY))
+//					{
+//						AlertDialog.Builder dlg = new AlertDialog.Builder(context);
+//						final EditText editText =  new EditText(context);
+//						editText.setId(100);
+//						dlg.setTitle("LP:").setIcon(
+//							     android.R.drawable.ic_dialog_info).setView(editText).setPositiveButton("确定", new DialogInterface.OnClickListener() {
+//									
+//									@Override
+//									public void onClick(DialogInterface dialog, int which) {
+//										// TODO Auto-generated method stub
+//										String text = editText.getText().toString();
+//										try{
+//											int i = 0;
+//											i = Integer.parseInt(text);
+//											player00.setLP(player00.getLP() + i);
+//											rectInvaliate.add(player00.getLpRect());
+//										}
+//										catch (NumberFormatException e) {
+//											e.printStackTrace();
+//										}
+//										Log.d("YGO",text);
+//									}
+//								}
+//							    		 )
+//							     .setNegativeButton("取消", null).show();	
+//					}
+//					for(MyButton btn : buttons){
+//						if(btn.getRect().contains((int)selX, (int)selY)){
+//							//button work
+//							message = btn.toString() + " is working";
+//							break;
+//						}
+//						else
+//						{
+//							message = "";
+//						}
+//					}
 			      break;
 			    }
         }
@@ -683,55 +750,55 @@ public class Singleton {
 			canvas.drawBitmap(coverImg,null,zone_on_show.getRect(), pen);
 		}
 		//draw desc
-		if(cardOnShow!=null)
-		{
-		    String name = cardOnShow.getName();
-		    String attr = cardOnShow.getAttr();
-		    int level =cardOnShow.getLevel();
-		    int atk = cardOnShow.getAttack();
-		    int def = cardOnShow.getDefence();
-		    String race = cardOnShow.getRace();
-		    String desc = cardOnShow.getDesc();
-		    String loc = FormatLocation(cardOnShow.getLoc().getValue());
-		    String text = null;
-		    TextUtil txtUtil = null;
-		    //name
-		    Log.d(TAG,"name:"+name);
-		    text = name;
-		    txtUtil = new TextUtil(text, 5, 250,	150, 20, Color.WHITE, Color.BLACK, 0, 15);
-		    txtUtil.InitText();
-		    txtUtil.DrawText(canvas);
-		    //attr
-		    text = attr + "  LV:" + level + "  ATK:" + atk + " /DEF:" + def;
-		    Log.d(TAG,"attr:"+text);
-		    txtUtil = new TextUtil(text, 5, 270, 150, 15, Color.WHITE, Color.BLACK, 0, 10);
-		    txtUtil.InitText();
-		    txtUtil.DrawText(canvas);
-		    //race
-		    text = "[" + race + "]";
-		    Log.d(TAG,"race:"+race);
-		    txtUtil = new TextUtil(text, 5, 285, 150, 15, Color.WHITE, Color.BLACK, 0, 10);
-		    txtUtil.InitText();
-		    txtUtil.DrawText(canvas);
-		    //位置，counter
-		    //TODO 原拥有者
-		    text = "位置: " + loc + "    原拥有者:"+"Player00";
-		    Log.d(TAG,"位置:"+text);
-		    txtUtil = new TextUtil(text, 5, 300, 150, 15, Color.WHITE, Color.BLACK, 0, 10);
-		    txtUtil.InitText();
-		    txtUtil.DrawText(canvas);
-		    //TODO counter
-		    //desc
-		    text = "描述";
-		    txtUtil = new TextUtil(text, 5, 330, 150, 15, Color.WHITE, Color.BLACK, 0, 10);
-		    txtUtil.InitText();
-		    txtUtil.DrawText(canvas);
-		    text = desc;
-		    Log.d(TAG,"desc:"+desc);
-		    txtUtil = new TextUtil(text, 5, 345, 150, 100, Color.WHITE, Color.BLACK, 0, 10);
-		    txtUtil.InitText();
-		    txtUtil.DrawText(canvas);
-		}
+//		if(cardOnShow!=null)
+//		{
+//		    String name = cardOnShow.getName();
+//		    String attr = cardOnShow.getAttr();
+//		    int level =cardOnShow.getLevel();
+//		    int atk = cardOnShow.getAttack();
+//		    int def = cardOnShow.getDefence();
+//		    String race = cardOnShow.getRace();
+//		    String desc = cardOnShow.getDesc();
+//		    String loc = FormatLocation(cardOnShow.getLoc().getValue());
+//		    String text = null;
+//		    TextUtil txtUtil = null;
+//		    //name
+//		    Log.d(TAG,"name:"+name);
+//		    text = name;
+//		    txtUtil = new TextUtil(text, 5, 250,	150, 20, Color.WHITE, Color.BLACK, 0, 15);
+//		    txtUtil.InitText();
+//		    txtUtil.DrawText(canvas);
+//		    //attr
+//		    text = attr + "  LV:" + level + "  ATK:" + atk + " /DEF:" + def;
+//		    Log.d(TAG,"attr:"+text);
+//		    txtUtil = new TextUtil(text, 5, 270, 150, 15, Color.WHITE, Color.BLACK, 0, 10);
+//		    txtUtil.InitText();
+//		    txtUtil.DrawText(canvas);
+//		    //race
+//		    text = "[" + race + "]";
+//		    Log.d(TAG,"race:"+race);
+//		    txtUtil = new TextUtil(text, 5, 285, 150, 15, Color.WHITE, Color.BLACK, 0, 10);
+//		    txtUtil.InitText();
+//		    txtUtil.DrawText(canvas);
+//		    //位置，counter
+//		    //TODO 原拥有者
+//		    text = "位置: " + loc + "    原拥有者:"+"Player00";
+//		    Log.d(TAG,"位置:"+text);
+//		    txtUtil = new TextUtil(text, 5, 300, 150, 15, Color.WHITE, Color.BLACK, 0, 10);
+//		    txtUtil.InitText();
+//		    txtUtil.DrawText(canvas);
+//		    //TODO counter
+//		    //desc
+//		    text = "描述";
+//		    txtUtil = new TextUtil(text, 5, 330, 150, 15, Color.WHITE, Color.BLACK, 0, 10);
+//		    txtUtil.InitText();
+//		    txtUtil.DrawText(canvas);
+//		    text = desc;
+//		    Log.d(TAG,"desc:"+desc);
+//		    txtUtil = new TextUtil(text, 5, 345, 150, 100, Color.WHITE, Color.BLACK, 0, 10);
+//		    txtUtil.InitText();
+//		    txtUtil.DrawText(canvas);
+//		}
 	    //EXTRA
 	    if(player00.getCardsExtra()!=null &&player01.getCardsExtra()!=null){
 	    	if(player00.getCardsExtra().getCount() > 0){
@@ -910,29 +977,304 @@ public class Singleton {
 		    txtUtil.InitText();
 		    txtUtil.DrawText(canvas);
 	    }
-	    //button
-	    canvas.drawBitmap(btn_dp.getBmp(), null, btn_dp.getRect(), pen);
-	    canvas.drawBitmap(btn_sp.getBmp(), null, btn_sp.getRect(), pen);
-	    canvas.drawBitmap(btn_m1.getBmp(), null, btn_m1.getRect(), pen);
-	    canvas.drawBitmap(btn_bp.getBmp(), null, btn_bp.getRect(), pen);
-	    canvas.drawBitmap(btn_m2.getBmp(), null, btn_m2.getRect(), pen);
-	    canvas.drawBitmap(btn_ep.getBmp(), null, btn_ep.getRect(), pen);
-	    canvas.drawBitmap(btn_coin.getBmp(), null, btn_coin.getRect(), pen);
-	    canvas.drawBitmap(btn_dice.getBmp(), null, btn_dice.getRect(), pen);
-	    canvas.drawBitmap(btn_token.getBmp(), null, btn_token.getRect(), pen);
-	    canvas.drawBitmap(btn_lp.getBmp(), null, btn_lp.getRect(), pen);
-	    canvas.drawBitmap(btn_endTurn.getBmp(), null, btn_endTurn.getRect(), pen);  
-	    
-	    //draw message
-	    if(message.length() > 0){
-		    TextUtil txtUtil = null;
-		    Log.d(TAG,"message:"+message);
-		    txtUtil = new TextUtil(message, 626, 75,	150, 60, Color.WHITE, Color.BLACK, 0, 20);
-		    txtUtil.InitText();
-		    txtUtil.DrawText(canvas);
-	    }
-	}
-	
+//	    //button
+//	    canvas.drawBitmap(btn_dp.getBmp(), null, btn_dp.getRect(), pen);
+//	    canvas.drawBitmap(btn_sp.getBmp(), null, btn_sp.getRect(), pen);
+//	    canvas.drawBitmap(btn_m1.getBmp(), null, btn_m1.getRect(), pen);
+//	    canvas.drawBitmap(btn_bp.getBmp(), null, btn_bp.getRect(), pen);
+//	    canvas.drawBitmap(btn_m2.getBmp(), null, btn_m2.getRect(), pen);
+//	    canvas.drawBitmap(btn_ep.getBmp(), null, btn_ep.getRect(), pen);
+//	    canvas.drawBitmap(btn_coin.getBmp(), null, btn_coin.getRect(), pen);
+//	    canvas.drawBitmap(btn_dice.getBmp(), null, btn_dice.getRect(), pen);
+//	    canvas.drawBitmap(btn_token.getBmp(), null, btn_token.getRect(), pen);
+//	    canvas.drawBitmap(btn_lp.getBmp(), null, btn_lp.getRect(), pen);
+//	    canvas.drawBitmap(btn_endTurn.getBmp(), null, btn_endTurn.getRect(), pen);  
+//	    
 
+	}	
 	
+	public void onLayout()
+	{
+		TextView txtDesc = (TextView) view.findViewById(R.id.txtDesc);
+		 if(txtDesc!=null)
+		 {
+			 txtDesc.setMovementMethod(ScrollingMovementMethod.getInstance()); 
+			 Rect r = rect_desc;
+			 txtDesc.layout(r.left,r.top,r.right,r.bottom);
+		 }
+		 TextView txtMessage = (TextView) view.findViewById(R.id.txtMessage);
+		 if(txtMessage!=null)
+		 {
+			 txtDesc.setMovementMethod(ScrollingMovementMethod.getInstance()); 
+			 txtMessage.setTextSize(10);
+			 Rect r = rect_message;
+			 txtMessage.layout(r.left,r.top,r.right,r.bottom);
+		 }
+		 
+		 
+		 ImageButton btnDp = (ImageButton) view.findViewById(R.id.btnDp);
+		 if(btnDp!=null)
+		 {
+			 Rect r = btn_dp.getRect();
+			 btnDp.layout(r.left,r.top,r.right,r.bottom);
+			 btnDp.setOnTouchListener(new OnTouchListener() {
+				
+				@Override
+				public boolean onTouch(View v, MotionEvent event) {
+					switch(event.getAction())
+					{
+						case (MotionEvent.ACTION_DOWN):						
+						{
+							message = "button dp is working";
+						}
+						break;
+					}
+					return false;
+				}
+			});
+			 btnDp.setBackgroundDrawable(view.getResources().getDrawable(R.drawable.ic_dp));
+		 }
+		 ImageButton btnSp = (ImageButton) view.findViewById(R.id.btnSp);
+		 if(btnSp!=null)
+		 {
+			 Rect r = btn_sp.getRect();
+			 btnSp.layout(r.left,r.top,r.right,r.bottom);
+			 btnSp.setOnTouchListener(new OnTouchListener() {
+				
+				@Override
+				public boolean onTouch(View v, MotionEvent event) {
+					switch(event.getAction())
+					{
+						case (MotionEvent.ACTION_DOWN):						
+						{
+							message = "button sp is working";
+						}
+						break;
+					}
+					return false;
+				}
+			});
+			 btnSp.setBackgroundDrawable(view.getResources().getDrawable(R.drawable.ic_sp));
+		 }
+		 ImageButton btnM1 = (ImageButton) view.findViewById(R.id.btnM1);
+		 if(btnM1!=null)
+		 {
+			 Rect r = btn_m1.getRect();
+			 btnM1.layout(r.left,r.top,r.right,r.bottom);
+			 btnM1.setOnTouchListener(new OnTouchListener() {
+				
+				@Override
+				public boolean onTouch(View v, MotionEvent event) {
+					switch(event.getAction())
+					{
+						case (MotionEvent.ACTION_DOWN):						
+						{
+							message = "button m1 is working";
+						}
+						break;
+					}
+					return false;
+				}
+			});
+			 btnM1.setBackgroundDrawable(view.getResources().getDrawable(R.drawable.ic_m1));
+		 }
+		 ImageButton btnBp = (ImageButton) view.findViewById(R.id.btnBp);
+		 if(btnBp!=null)
+		 {
+			 Rect r = btn_bp.getRect();
+			 btnBp.layout(r.left,r.top,r.right,r.bottom);
+			 btnBp.setOnTouchListener(new OnTouchListener() {
+				
+				@Override
+				public boolean onTouch(View v, MotionEvent event) {
+					switch(event.getAction())
+					{
+						case (MotionEvent.ACTION_DOWN):						
+						{
+							message = "button bp is working";
+						}
+						break;
+					}
+					return false;
+				}
+			});
+			 btnBp.setBackgroundDrawable(view.getResources().getDrawable(R.drawable.ic_bp));
+		 }
+		 ImageButton btnM2 = (ImageButton) view.findViewById(R.id.btnM2);
+		 if(btnM2!=null)
+		 {
+			 Rect r = btn_m2.getRect();
+			 btnM2.layout(r.left,r.top,r.right,r.bottom);
+			 btnM2.setOnTouchListener(new OnTouchListener() {
+				
+				@Override
+				public boolean onTouch(View v, MotionEvent event) {
+					switch(event.getAction())
+					{
+						case (MotionEvent.ACTION_DOWN):						
+						{
+							message = "button m2 is working";
+						}
+						break;
+					}
+					return false;
+				}
+			});
+			 btnM2.setBackgroundDrawable(view.getResources().getDrawable(R.drawable.ic_m2));
+		 }
+		 ImageButton btnEp = (ImageButton) view.findViewById(R.id.btnEp);
+		 if(btnEp!=null)
+		 {
+			 Rect r = btn_ep.getRect();
+			 btnEp.layout(r.left,r.top,r.right,r.bottom);
+			 btnEp.setOnTouchListener(new OnTouchListener() {
+				
+				@Override
+				public boolean onTouch(View v, MotionEvent event) {
+					switch(event.getAction())
+					{
+						case (MotionEvent.ACTION_DOWN):						
+						{
+							message = "button ep is working";
+						}
+						break;
+					}
+					return false;
+				}
+			});
+			 btnEp.setBackgroundDrawable(view.getResources().getDrawable(R.drawable.ic_ep));
+		 }
+		 ImageButton btnCoin = (ImageButton) view.findViewById(R.id.btnCoin);
+		 if(btnCoin!=null)
+		 {
+			 Rect r = btn_coin.getRect();
+			 btnCoin.layout(r.left,r.top,r.right,r.bottom);
+			 btnCoin.setOnTouchListener(new OnTouchListener() {
+				
+				@Override
+				public boolean onTouch(View v, MotionEvent event) {
+					switch(event.getAction())
+					{
+						case (MotionEvent.ACTION_DOWN):						
+						{
+							message = "button coin is working";
+						}
+						break;
+					}
+					return false;
+				}
+			});
+			 btnCoin.setBackgroundDrawable(view.getResources().getDrawable(R.drawable.ic_coin));
+		 }
+		 ImageButton btnDice = (ImageButton) view.findViewById(R.id.btnDice);
+		 if(btnDice!=null)
+		 {
+			 Rect r = btn_dice.getRect();
+			 btnDice.layout(r.left,r.top,r.right,r.bottom);
+			 btnDice.setOnTouchListener(new OnTouchListener() {
+				
+				@Override
+				public boolean onTouch(View v, MotionEvent event) {
+					switch(event.getAction())
+					{
+						case (MotionEvent.ACTION_DOWN):						
+						{
+							message = "button dice is working";
+						}
+						break;
+					}
+					return false;
+				}
+			});
+			 btnDice.setBackgroundDrawable(view.getResources().getDrawable(R.drawable.ic_dice));
+		 }
+		 ImageButton btnToken = (ImageButton) view.findViewById(R.id.btnToken);
+		 if(btnToken!=null)
+		 {
+			 Rect r = btn_token.getRect();
+			 btnToken.layout(r.left,r.top,r.right,r.bottom);
+			 btnToken.setOnTouchListener(new OnTouchListener() {
+				
+				@Override
+				public boolean onTouch(View v, MotionEvent event) {
+					switch(event.getAction())
+					{
+						case (MotionEvent.ACTION_DOWN):						
+						{
+							message = "button token is working";
+						}
+						break;
+					}
+					return false;
+				}
+			});
+			 btnToken.setBackgroundDrawable(view.getResources().getDrawable(R.drawable.ic_token));
+		 }
+		 ImageButton btnLp = (ImageButton) view.findViewById(R.id.btnLp);
+		 if(btnLp!=null)
+		 {
+			 Rect r = btn_lp.getRect();
+			 btnLp.layout(r.left,r.top,r.right,r.bottom);
+			 btnLp.setOnTouchListener(new OnTouchListener() {
+				
+				@Override
+				public boolean onTouch(View v, MotionEvent event) {
+					switch(event.getAction())
+					{
+						case (MotionEvent.ACTION_DOWN):						
+						{
+							AlertDialog.Builder dlg = new AlertDialog.Builder(context);
+							final EditText editText =  new EditText(context);
+							editText.setId(100);
+							dlg.setTitle("LP:").setIcon(
+								     android.R.drawable.ic_dialog_info).setView(editText).setPositiveButton("确定", new DialogInterface.OnClickListener() {
+										
+										@Override
+										public void onClick(DialogInterface dialog, int which) {
+											// TODO Auto-generated method stub
+											String text = editText.getText().toString();
+											try{
+												int i = 0;
+												i = Integer.parseInt(text);
+												player00.setLP(player00.getLP() + i);
+											}
+											catch (NumberFormatException e) {
+												e.printStackTrace();
+											}
+											Log.d("YGO",text);
+										}
+									}
+								    		 )
+								     .setNegativeButton("取消", null).show();	
+						}
+						break;
+					}
+					return false;
+				}
+			});
+			 btnLp.setBackgroundDrawable(view.getResources().getDrawable(R.drawable.ic_lp));
+		 }
+		 ImageButton btnEndTurn = (ImageButton) view.findViewById(R.id.btnEndTurn);
+		 if(btnEndTurn!=null)
+		 {
+			 Rect r = btn_endTurn.getRect();
+			 btnEndTurn.layout(r.left,r.top,r.right,r.bottom);
+			 btnEndTurn.setOnTouchListener(new OnTouchListener() {
+				
+				@Override
+				public boolean onTouch(View v, MotionEvent event) {
+					switch(event.getAction())
+					{
+						case (MotionEvent.ACTION_DOWN):						
+						{
+							message = "button endTurn is working";
+						}
+						break;
+					}
+					return false;
+				}
+			});
+			 btnEndTurn.setBackgroundDrawable(view.getResources().getDrawable(R.drawable.ic_endturn));
+		 }
+	}
 }

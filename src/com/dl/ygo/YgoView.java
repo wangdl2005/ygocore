@@ -1,6 +1,8 @@
 package com.dl.ygo;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -18,6 +20,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.dl.ygo.*;
@@ -25,12 +28,11 @@ import com.dl.ygo.*;
 public class YgoView extends ViewGroup {
 	int width = 0;
 	int height = 0;
-	
 	public YgoView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		// TODO Auto-generated constructor stub
 		setWillNotDraw(false);
-		}
+	}
 
 
 	public YgoView(Context context) {
@@ -50,14 +52,14 @@ public class YgoView extends ViewGroup {
 	@Override
 	protected void onDraw(Canvas canvas) {
 		// TODO Auto-generated method stub		
-		Singleton.getInstance(this.getContext()).onDraw(canvas);;
+		Singleton.getInstance(this).onDraw(canvas);;
 		super.onDraw(canvas);
 	}
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		// TODO Auto-generated method stub		
-		ArrayList<Rect> rects  = Singleton.getInstance(this.getContext()).onTouchEvent(event);
+		ArrayList<Rect> rects  = Singleton.getInstance(this).onTouchEvent(event);
 		for(Rect r : rects){
 			invalidate(r);
 		}
@@ -69,11 +71,7 @@ public class YgoView extends ViewGroup {
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 		// TODO Auto-generated method stub
-		 View v = findViewById(R.id.txtDesc);
-		 if(v!=null)
-		 {
-			 v.layout(3,240,163,440);
-		 }
+		Singleton.getInstance(this).onLayout();
 	}
 	
 	private void addMyView()
