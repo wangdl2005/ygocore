@@ -1,5 +1,7 @@
 package com.dl.ygo;
 
+import android.graphics.Rect;
+
 public class Player {
 	public int getLP() {
 		return LP;
@@ -72,7 +74,12 @@ public class Player {
 	public void setCardsBanish(CardGroup cardsBanish) {
 		this.cardsBanish = cardsBanish;
 	}
+	public Rect getLpRect()
+	{
+		return this.LpRect;
+	}
 
+	private Rect LpRect;
 	private int LP;
 	//轮到
 	private boolean isTurn;
@@ -86,7 +93,7 @@ public class Player {
 	
 	public Player(int lp,boolean isTurn,CardGroup hand
 			,CardGroup stzone,CardGroup mzone,CardGroup deck
-			,CardGroup grave,CardGroup extra,CardGroup banish)
+			,CardGroup grave,CardGroup extra,CardGroup banish,Rect lpRect)
 	{
 		this.LP = lp;
 		this.isTurn = isTurn;
@@ -97,5 +104,6 @@ public class Player {
 		this.cardsHand = hand;
 		this.cardsMZONE = mzone;
 		this.cardsST = stzone;
+		this.LpRect = lpRect;
 	}
 }

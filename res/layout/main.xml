@@ -5,7 +5,18 @@
     android:orientation="vertical" >
     <com.dl.ygo.YgoView
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"/>
+        android:layout_height="fill_parent">
+        <TextView 
+         android:id="@+id/txtDesc"
+         android:layout_width="108dp" 
+         android:layout_height="65dp"
+         android:background="#ffffffff"
+         android:paddingLeft = "2dp"
+         android:text="hello textview"
+         />
+        
+        
+        </com.dl.ygo.YgoView>
     
      <!--  
      <TextView 

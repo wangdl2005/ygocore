@@ -13,7 +13,9 @@ import com.dl.ocg.Zone;
 import com.dl.ocg.Common.*;
 import static com.dl.ocg.Common.*;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
@@ -25,13 +27,22 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.widget.EditText;
 import android.widget.Toast;
 
 public class Singleton {
 	//单态
 	private static Singleton instance = null;
-	private Singleton(){
+	private Singleton(Context context){
+		this.context = context;
 		init();
+	}
+	public static synchronized Singleton getInstance(Context context){
+		if(instance == null){
+			instance = new Singleton(context);
+		}	
+		instance.context = context;
+		return instance;
 	}
 	private void init() {
 		pen = new Paint();
@@ -66,18 +77,15 @@ public class Singleton {
 		//player 		
 		CardGroup emptyCardGroup = new CardGroup(0);
 		player00 = new Player(LP_MAX, false, emptyCardGroup, emptyCardGroup
-				, emptyCardGroup, emptyCardGroup, emptyCardGroup, emptyCardGroup, emptyCardGroup);
+				, emptyCardGroup, emptyCardGroup, emptyCardGroup
+				, emptyCardGroup, emptyCardGroup,rect_player00_lp);
 		player01 = new Player(LP_MAX, false, emptyCardGroup, emptyCardGroup
-				, emptyCardGroup, emptyCardGroup, emptyCardGroup, emptyCardGroup, emptyCardGroup);
+				, emptyCardGroup, emptyCardGroup, emptyCardGroup
+				, emptyCardGroup, emptyCardGroup,rect_player01_lp);
+		cardOnShow = new Card(cardDatas, cardStrings, cardPics, 1);
 		initialCardGroup();
 		test();
 
-	}
-	public static synchronized Singleton getInstance(){
-		if(instance == null){
-			instance = new Singleton();
-		}
-		return instance;
 	}
 	//
 	private Player player00;
@@ -174,6 +182,8 @@ public class Singleton {
 	private Rect rect_token =new Rect();
 	private Rect rect_lp =new Rect();
 	private Rect rect_endTurn =new Rect();
+	private Rect rect_player00_lp = new Rect();
+	private Rect rect_player01_lp = new Rect();
 	
 	
 	private MyButton btn_dp;
@@ -389,6 +399,10 @@ public class Singleton {
 		rect_token.set(338,220,375,257);
 		rect_lp.set(396,220,456,257);
 		rect_endTurn.set(480,220,560,257);
+		
+		//
+		rect_player01_lp.set(618,5,793,55);
+		rect_player00_lp.set(618,385,793,435);
 	}	
 	//get card return null if there is not a card
 	private Card getCard(float x,float y){
@@ -497,6 +511,11 @@ public class Singleton {
 		Card c16 = new Card(cardDatas,cardStrings,cardPics,50755);
 		Card c17 =new Card(cardDatas,cardStrings,cardPics,168917);
 		Card c18 = new Card(cardDatas,cardStrings,cardPics,176392);
+		Card c19 =new Card(cardDatas,cardStrings,cardPics,27551);
+		Card c20 = new Card(cardDatas,cardStrings,cardPics,50755);
+		Card c21 =new Card(cardDatas,cardStrings,cardPics,168917);
+		Card c22 = new Card(cardDatas,cardStrings,cardPics,176392);
+		Card c23 =new Card(cardDatas,cardStrings,cardPics,168917);
 		
 		c1.setCardZone(zone_0_remove);
 		player00.getCardsBanish().addCard(c1);
@@ -509,6 +528,20 @@ public class Singleton {
 		player00.getCardsDeck().addCard(c3);
 		player00.getCardsDeck().addCard(c4);
 		player00.getCardsDeck().addCard(c5);
+		player00.getCardsDeck().addCard(c19);
+		player00.getCardsDeck().addCard(c20);
+		player00.getCardsDeck().addCard(c21);
+		int n =20;
+		while(n > 0){
+			player00.getCardsDeck().addCard(c22);
+			--n;
+		}
+		
+		n = 40;
+		while(n > 0){
+			player01.getCardsDeck().addCard(c23);
+			--n;
+		}
 		
 		c6.setCardZone(zone_0_hand);
 		c7.setCardZone(zone_0_hand);
@@ -524,13 +557,21 @@ public class Singleton {
 		player00.getCardsST().addCard(c10);
 		
 		c11.setCardZone(zone_0_extra);
-		player00.getCardsExtra().addCard(c11);
+		n = 15;
+		while(n > 0){
+			player00.getCardsExtra().addCard(c11);
+			--n;
+		}
 		
 		c12.setCardZone(zone_0_szone_5);
 		player00.getCardsST().addCard(c12);
 		
 		c13.setCardZone(zone_1_extra);
-		player01.getCardsExtra().addCard(c13);
+		n = 15;
+		while(n > 0){
+			player01.getCardsExtra().addCard(c13);
+			--n;
+		}
 		
 		c14.setCardZone(zone_1_grave);
 		player01.getCardsGrave().addCard(c14);
@@ -566,23 +607,59 @@ public class Singleton {
 	
 	//onTouch
 	public ArrayList<Rect> onTouchEvent(MotionEvent event){
+
+		final ArrayList<Rect> rectInvaliate = new ArrayList<Rect>();
 		float selX = event.getX();
 		float selY = event.getY();
-		cardOnShow = getCard(selX,selY);
-		
-		//button
-		for(MyButton btn : buttons){
-			if(btn.getRect().contains((int)selX, (int)selY)){
-				//button work
-				message = btn.toString() + " is working";
-				break;
-			}
-			else
-			{
-				message = "";
-			}
-		}
-		ArrayList<Rect> rectInvaliate = new ArrayList<Rect>();
+		switch (event.getAction()) 
+		{
+			case MotionEvent.ACTION_DOWN:
+		    {
+					cardOnShow = getCard(selX,selY);
+					
+					//button
+					if(btn_lp.getRect().contains((int)selX, (int)selY))
+					{
+						AlertDialog.Builder dlg = new AlertDialog.Builder(context);
+						final EditText editText =  new EditText(context);
+						editText.setId(100);
+						dlg.setTitle("LP:").setIcon(
+							     android.R.drawable.ic_dialog_info).setView(editText).setPositiveButton("确定", new DialogInterface.OnClickListener() {
+									
+									@Override
+									public void onClick(DialogInterface dialog, int which) {
+										// TODO Auto-generated method stub
+										String text = editText.getText().toString();
+										try{
+											int i = 0;
+											i = Integer.parseInt(text);
+											player00.setLP(player00.getLP() + i);
+											rectInvaliate.add(player00.getLpRect());
+										}
+										catch (NumberFormatException e) {
+											e.printStackTrace();
+										}
+										Log.d("YGO",text);
+									}
+								}
+							    		 )
+							     .setNegativeButton("取消", null).show();	
+					}
+					for(MyButton btn : buttons){
+						if(btn.getRect().contains((int)selX, (int)selY)){
+							//button work
+							message = btn.toString() + " is working";
+							break;
+						}
+						else
+						{
+							message = "";
+						}
+					}
+			      break;
+			    }
+        }
+        
 		rectInvaliate.add(rect_desc);
 		rectInvaliate.add(zone_on_show.getRect());
 		//button
@@ -590,7 +667,6 @@ public class Singleton {
 		
 		return rectInvaliate;
 	}
-	
 	//draw
 	public void onDraw(Canvas canvas){
 		//background
@@ -659,10 +735,24 @@ public class Singleton {
 	    //EXTRA
 	    if(player00.getCardsExtra()!=null &&player01.getCardsExtra()!=null){
 	    	if(player00.getCardsExtra().getCount() > 0){
-	    		canvas.drawBitmap(coverImg, null, zone_0_extra.getRect(), pen);
+	    		int n = player00.getCardsExtra().getCount() /5 + 1;
+	    		int bottom = zone_0_extra.getRect().bottom;
+	    		int top = zone_0_extra.getRect().top;
+	    		int left = zone_0_extra.getRect().left;
+	    		int right = zone_0_extra.getRect().right;
+	    		for(int i=0;i<n;++i){
+	    			canvas.drawBitmap(coverImg, null, new Rect(left-i,top-i,right-i,bottom-i), pen);	    	
+	    		}
 	    	}
 	    	if(player01.getCardsExtra().getCount() > 0){
-	    		canvas.drawBitmap(coverImg, null, zone_1_extra.getRect(), pen);
+	    		int n = player01.getCardsExtra().getCount() /5 + 1;
+	    		int bottom = zone_1_extra.getRect().bottom;
+	    		int top = zone_1_extra.getRect().top;
+	    		int left = zone_1_extra.getRect().left;
+	    		int right = zone_1_extra.getRect().right;
+	    		for(int i=0;i<n;++i){
+	    			canvas.drawBitmap(coverImg, null, new Rect(left+i,top-i,right+i,bottom-i), pen);	    	
+	    		}
 	    	}
 	    }
 	    //GRAVE
@@ -677,10 +767,24 @@ public class Singleton {
 	    //DECK
 	    if(player00.getCardsDeck()!=null &&player01.getCardsDeck()!=null){
 	    	if(player00.getCardsDeck().getCount() > 0){
-	    		canvas.drawBitmap(coverImg, null, zone_0_deck.getRect(), pen);
+	    		int n = player00.getCardsDeck().getCount() /5 + 1;
+	    		int bottom = zone_0_deck.getRect().bottom;
+	    		int top = zone_0_deck.getRect().top;
+	    		int left = zone_0_deck.getRect().left;
+	    		int right = zone_0_deck.getRect().right;
+	    		for(int i=0;i<n;++i){
+	    			canvas.drawBitmap(coverImg, null, new Rect(left+i,top-i,right+i,bottom-i), pen);	    	
+	    		}
 	    	}
 	    	if(player01.getCardsDeck().getCount() > 0){
-	    		canvas.drawBitmap(coverImg, null, zone_1_deck.getRect(), pen);
+	    		int n = player01.getCardsDeck().getCount() /5 + 1;
+	    		int bottom = zone_1_deck.getRect().bottom;
+	    		int top = zone_1_deck.getRect().top;
+	    		int left = zone_1_deck.getRect().left;
+	    		int right = zone_1_deck.getRect().right;
+	    		for(int i=0;i<n;++i){
+	    			canvas.drawBitmap(coverImg, null, new Rect(left-i,top-i,right-i,bottom-i), pen);	    	
+	    		}
 	    	}
 	    }
 	    //REMOVE BANNISH
@@ -771,7 +875,41 @@ public class Singleton {
 	    		}
 	    	}
 	    }    
-	    
+	    // lp
+	    if(player00 != null )
+	    {
+	    	TextUtil txtUtil = null;
+	    	//player00
+	    	Rect rect_player00 = player00.getLpRect();
+	    	int left = rect_player00.left;
+	    	int top = rect_player00.top;
+	    	int right = rect_player00.right;
+	    	int bottom = rect_player00.bottom;
+	    	int w = rect_player00.width();
+	    	int h = rect_player00.height();
+	    	String lp = "LP: " + String.valueOf(player00.getLP());
+		    Log.d(TAG,"player00 LP:"+lp);
+		    txtUtil = new TextUtil(lp, left, bottom,	w, h, Color.WHITE, Color.BLACK, 0, h-10);
+		    txtUtil.InitText();
+		    txtUtil.DrawText(canvas);
+	    }
+	    if(player01 != null )
+	    {
+	    	TextUtil txtUtil = null;
+	    	//player01
+	    	Rect rect_player01 = player01.getLpRect();
+	    	int left = rect_player01.left;
+	    	int top = rect_player01.top;
+	    	int right = rect_player01.right;
+	    	int bottom = rect_player01.bottom;
+	    	int w = rect_player01.width();
+	    	int h = rect_player01.height();
+	    	String lp =  "LP: " + String.valueOf(player01.getLP());
+		    Log.d(TAG,"player01 LP:"+lp);
+		    txtUtil = new TextUtil(lp, left, bottom,	w, h, Color.WHITE, Color.BLACK, 0, h-10);
+		    txtUtil.InitText();
+		    txtUtil.DrawText(canvas);
+	    }
 	    //button
 	    canvas.drawBitmap(btn_dp.getBmp(), null, btn_dp.getRect(), pen);
 	    canvas.drawBitmap(btn_sp.getBmp(), null, btn_sp.getRect(), pen);
@@ -786,11 +924,13 @@ public class Singleton {
 	    canvas.drawBitmap(btn_endTurn.getBmp(), null, btn_endTurn.getRect(), pen);  
 	    
 	    //draw message
-	    TextUtil txtUtil = null;
-	    Log.d(TAG,"message:"+message);
-	    txtUtil = new TextUtil(message, 626, 75,	150, 60, Color.WHITE, Color.BLACK, 0, 20);
-	    txtUtil.InitText();
-	    txtUtil.DrawText(canvas);
+	    if(message.length() > 0){
+		    TextUtil txtUtil = null;
+		    Log.d(TAG,"message:"+message);
+		    txtUtil = new TextUtil(message, 626, 75,	150, 60, Color.WHITE, Color.BLACK, 0, 20);
+		    txtUtil.InitText();
+		    txtUtil.DrawText(canvas);
+	    }
 	}
 	
 
