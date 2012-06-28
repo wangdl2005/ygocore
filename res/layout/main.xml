@@ -13,8 +13,7 @@
          android:singleLine="false" 
   		 android:scrollbars="vertical"
          android:textColor="#000000"    
-         android:textSize="10dp"     
-         android:text="hello textview"
+         android:textSize="9dp"     
          />
         <TextView 
          android:id="@+id/txtMessage"
@@ -23,8 +22,8 @@
          android:singleLine="false" 
   		 android:scrollbars="vertical"
          android:textColor="#000000"   
-         android:textSize="10dp"           
-         android:text="hello message"
+         android:background="#FFFFFF"
+         android:textSize="9dp"         
          />
         <ImageButton 
             android:id="@+id/btnDp"

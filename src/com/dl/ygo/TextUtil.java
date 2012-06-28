@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.FontMetrics;
+import android.graphics.Typeface;
 import android.view.KeyEvent;
 
 public class TextUtil {
@@ -46,6 +47,9 @@ public class TextUtil {
 		// 对画笔属性的设置
 //		mPaint.setARGB(this.mAlpha, Color.red(this.mFontColor), Color
 //				.green(this.mFontColor), Color.blue(this.mFontColor));
+//		Typeface font = Typeface.create("宋体",Typeface.BOLD);
+//		mPaint.setTypeface(font);
+		mPaint.setAntiAlias(true);
 		mPaint.setTextSize(this.mTextSize);
 		mPaint.setColor(this.mFontColor);
 		this.GetTextIfon();
