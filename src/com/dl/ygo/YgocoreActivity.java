@@ -2,6 +2,7 @@ package com.dl.ygo;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.WindowManager;
 
 public class YgocoreActivity extends Activity {
@@ -15,5 +16,14 @@ public class YgocoreActivity extends Activity {
 		/**全屏设置，隐藏窗口所有装饰*/  
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,   
 		WindowManager.LayoutParams.FLAG_FULLSCREEN);  
+    }
+    
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+    	YgoView view = (YgoView) findViewById(R.id.ygoview);
+    	if(view.onKeyDown(keyCode, event) ){
+    		return true;
+    	}
+		return super.onKeyDown(keyCode, event);
     }
 }

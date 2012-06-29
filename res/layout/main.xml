@@ -4,8 +4,8 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
     <com.dl.ygo.YgoView
+        android:id ="@+id/ygoview"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent">
-        
         </com.dl.ygo.YgoView>
 </RelativeLayout>

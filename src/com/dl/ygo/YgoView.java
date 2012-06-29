@@ -19,6 +19,7 @@ import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -35,6 +36,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnTouchListener;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
@@ -68,6 +71,7 @@ public class YgoView extends ViewGroup implements OnClickListener{
 	private String message = "";
 	//card data
 	private HashMap<String,Bitmap> textures = new HashMap<String, Bitmap>();
+	private HashMap<Integer,Bitmap> cardSmallPics = new HashMap<Integer, Bitmap>();
 	private HashMap<Integer,Bitmap> cardPics = new HashMap<Integer, Bitmap>();
 	private HashMap<Integer,CardDataC> cardDatas = new HashMap<Integer,CardDataC>();
 	private HashMap<Integer,CardString> cardStrings = new HashMap<Integer, CardString>();
@@ -155,6 +159,8 @@ public class YgoView extends ViewGroup implements OnClickListener{
 	private Rect rect_player00_lp = new Rect();
 	private Rect rect_player01_lp = new Rect();
 	
+	private Rect rect_cardsView = new Rect();
+	
 	
 	private ImageButton btnDp;
 	private ImageButton btnSp;
@@ -186,6 +192,7 @@ public class YgoView extends ViewGroup implements OnClickListener{
 	private TextView txtMessage;
 	
 	private CardsView cardsView;
+	private boolean isEnabledCardsView = false;
 
 	private ArrayList<MyButton> buttons = new ArrayList<MyButton>();
 	public YgoView(Context context, AttributeSet attrs) {
@@ -547,31 +554,70 @@ public class YgoView extends ViewGroup implements OnClickListener{
 		{
 			case MotionEvent.ACTION_DOWN:
 		    {
+		    		//cardsOnShow
 					cardOnShow = getCard(selX,selY);
-						if(cardOnShow != null)
-						{
-//							String name = cardOnShow.getName();
-//						    String attr = cardOnShow.getAttr();
-//						    int level =cardOnShow.getLevel();
-//						    int atk = cardOnShow.getAttack();
-//						    int def = cardOnShow.getDefence();
-//						    String race = cardOnShow.getRace();
-//						    String loc = FormatLocation(cardOnShow.getLoc().getValue());
+					if(cardOnShow != null)
+					{
+							setCardOnShow(cardOnShow);
 						    String desc = cardOnShow.getDesc();
 							StringBuilder text = new StringBuilder();
-//							text.append(name + "\n");
-//							text.append(attr + "  LV:" + level + "  ATK:" + atk + " /DEF:" + def + "\n");
-//							text.append("[" + race + "]" + "\n");
-//							text.append("位置: " + loc + "    原拥有者:"+"Player00" + "\n");
-//							//TODO
-//							text.append("\n");
 							text.append(desc);
 							txtDesc.setText(text);
 							txtDesc.invalidate();
 							rectInvaliate.add(rect_card_info);
 							rectInvaliate.add(zone_on_show.getRect());
-						}						
-					break;
+					}
+					//extra,grave,deck,remove
+					Zone z = getZone(selX, selY);
+					if(z != null){
+						if(z.isTheSame(zone_0_deck)){
+							isEnabledCardsView = true;
+							cardsView.setCards(player00.getCardsDeck());
+							cardsView.setEnabled(true);
+							cardsView.setVisibility(VISIBLE);
+						}else if(z.isTheSame(zone_0_extra))
+						{
+							isEnabledCardsView = true;
+							cardsView.setCards(player00.getCardsExtra());
+							cardsView.setEnabled(true);
+							cardsView.setVisibility(VISIBLE);
+						}else if(z.isTheSame(zone_0_grave))
+						{
+							isEnabledCardsView = true;
+							cardsView.setCards(player00.getCardsGrave());
+							cardsView.setEnabled(true);
+							cardsView.setVisibility(VISIBLE);
+						}else if(z.isTheSame(zone_0_remove))
+						{
+							isEnabledCardsView = true;
+							cardsView.setCards(player00.getCardsBanish());
+							cardsView.setEnabled(true);
+							cardsView.setVisibility(VISIBLE);
+						}else if(z.isTheSame(zone_1_deck)){
+							isEnabledCardsView = true;
+							cardsView.setCards(player01.getCardsDeck());
+							cardsView.setEnabled(true);
+							cardsView.setVisibility(VISIBLE);
+						}else if(z.isTheSame( zone_1_extra))
+						{
+							isEnabledCardsView = true;
+							cardsView.setCards(player01.getCardsExtra());
+							cardsView.setEnabled(true);
+							cardsView.setVisibility(VISIBLE);
+						}else if(z.isTheSame(zone_1_grave))
+						{
+							isEnabledCardsView = true;
+							cardsView.setCards(player01.getCardsGrave());
+							cardsView.setEnabled(true);
+							cardsView.setVisibility(VISIBLE);
+						}else if(z.isTheSame(zone_1_remove))
+						{
+							isEnabledCardsView = true;
+							cardsView.setCards(player01.getCardsBanish());
+							cardsView.setEnabled(true);
+							cardsView.setVisibility(VISIBLE);
+						}
+					}
 			}
         }        		
 		for(Rect r : rectInvaliate){
@@ -587,6 +633,16 @@ public class YgoView extends ViewGroup implements OnClickListener{
 		 setChildView();
 	}
 
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		 if(keyCode == KeyEvent.KEYCODE_BACK && isEnabledCardsView == true){
+				isEnabledCardsView = false;
+				cardsView.setEnabled(false);
+				cardsView.setVisibility(INVISIBLE);
+				return true;
+		 }
+		 return super.onKeyDown(keyCode, event);
+	}
 
 	private void setChildView() {
 		if(txtDesc!=null)
@@ -657,8 +713,9 @@ public class YgoView extends ViewGroup implements OnClickListener{
 
 
 		 if(cardsView != null){
-			cardsView.measure(700, 400);
-			cardsView.layout(0, 0, 700, 400);
+			Rect r1 = rect_cardsView;
+			cardsView.measure(r1.right-r1.left,r1.bottom-r1.top);
+			cardsView.layout(r1.left	, r1.top, r1.right, r1.bottom);
 		 }
 	}
 
@@ -722,7 +779,19 @@ public class YgoView extends ViewGroup implements OnClickListener{
 		
 		//cards view
 		cardsView = new CardsView(getContext(),player00.getCardsDeck());
-	
+		cardsView.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				// TODO Auto-generated method stub
+				setCardOnShow((Card) parent.getItemAtPosition(position));
+				YgoView.this.invalidate(rect_card_info);
+				YgoView.this.invalidate(zone_on_show.getRect());
+			}
+		});
+		cardsView.setEnabled(false);
+		cardsView.setVisibility(INVISIBLE);
 		
 	 	addView(btnDp);
 		addView(btnSp);
@@ -748,7 +817,6 @@ public class YgoView extends ViewGroup implements OnClickListener{
 
 	@Override
 	public void onClick(View v) {
-		// TODO Auto-generated method stub
 		//LP BUTTON
 		if(v == btnLp)
 		{
@@ -790,13 +858,20 @@ public class YgoView extends ViewGroup implements OnClickListener{
 		String dirPath = "/data/data/com.dl.ygo/pics/";
 		File dir = new File(dirPath);
 		File[] fileList = dir.listFiles();
+		Log.d(TAG, "begin to read bmps");
 		if(fileList != null){
 			for(File f : fileList){
-				//Log.d(TAG, f.getAbsolutePath());
-				bmp = ((BitmapDrawable)(BitmapDrawable.createFromPath(f.getAbsolutePath()))).getBitmap();  				
-				Log.d(TAG,f.getName());
+			
+				bmp = ((BitmapDrawable)(BitmapDrawable.createFromPath(f.getAbsolutePath()))).getBitmap();  
 				try{
-				cardPics.put(Integer.parseInt(f.getName().replaceAll(".jpg","")),bmp);				
+					cardPics.put(Integer.parseInt(f.getName().replaceAll(".jpg","")),bmp);				
+				}
+				catch(NumberFormatException ex){
+					continue;
+				}
+				bmp = Bitmap.createScaledBitmap(bmp, SMALL_CARD_WIDTH, SMALL_CARD_HEIGHT, false);
+				try{
+					cardSmallPics.put(Integer.parseInt(f.getName().replaceAll(".jpg","")),bmp);				
 				}
 				catch(NumberFormatException ex){
 					continue;
@@ -809,11 +884,11 @@ public class YgoView extends ViewGroup implements OnClickListener{
 		if(fileList != null){
 			for(File f : fileList){
 				//Log.d(TAG, f.getAbsolutePath());
-				bmp = ((BitmapDrawable)(BitmapDrawable.createFromPath(f.getAbsolutePath()))).getBitmap();  				
-				Log.d(TAG,f.getName());
+				bmp = ((BitmapDrawable)(BitmapDrawable.createFromPath(f.getAbsolutePath()))).getBitmap();  		
 				textures.put(f.getName().replaceAll(".png",""),bmp);				
 			}
 		}
+		Log.d(TAG, "end to read bmps");
 	}
 	//读取字符串信息
 	private void readStrings(){
@@ -984,6 +1059,8 @@ public class YgoView extends ViewGroup implements OnClickListener{
 		//
 		rect_player01_lp.set(618,5,793,55);
 		rect_player00_lp.set(618,385,793,435);
+		
+		rect_cardsView.set(170,63,610,377);
 	}	
 	//get card return null if there is not a card
 	private Card getCard(float x,float y){
@@ -1052,16 +1129,16 @@ public class YgoView extends ViewGroup implements OnClickListener{
 		return loc;
 	}
 	//get rect return null if no matches
-//	private Rect getRect(float x,float y){
-//		Rect tmp = null;
-//		for(Zone z : zones){
-//			if(z.getRect().contains((int)x,(int)y)){
-//				tmp = z.getRect();
-//				break;
-//			}
-//		}
-//		return tmp;
-//	}
+	private Zone getZone(float x,float y){
+		Zone tmp = null;
+		for(Zone z : zones){
+			if(z.getRect().contains((int)x,(int)y)){
+				tmp = z;
+				break;
+			}
+		}
+		return tmp;
+	}
 	//rotate
 	private Rect rotate(Rect rect){
 		int l = rect.left;
@@ -1074,29 +1151,29 @@ public class YgoView extends ViewGroup implements OnClickListener{
 	}
 	
 	private void test(){
-		Card c1 = new Card(cardDatas,cardStrings,cardPics,1);
-		Card c2 =new Card(cardDatas,cardStrings,cardPics,131182);
-		Card c3 = new Card(cardDatas,cardStrings,cardPics,135598);
-		Card c4 =new Card(cardDatas,cardStrings,cardPics,168917);
-		Card c5 = new Card(cardDatas,cardStrings,cardPics,176392);
-		Card c6 = new Card(cardDatas,cardStrings,cardPics,191749);
-		Card c7 = new Card(cardDatas,cardStrings,cardPics,218704);
-		Card c8 =new Card(cardDatas,cardStrings,cardPics,27551);
-		Card c9 = new Card(cardDatas,cardStrings,cardPics,50755);
-		Card c10 = new Card(cardDatas,cardStrings,cardPics,135598);
-		Card c11 =new Card(cardDatas,cardStrings,cardPics,168917);
-		Card c12 = new Card(cardDatas,cardStrings,cardPics,176392);
-		Card c13 = new Card(cardDatas,cardStrings,cardPics,191749);
-		Card c14 = new Card(cardDatas,cardStrings,cardPics,218704);
-		Card c15 =new Card(cardDatas,cardStrings,cardPics,27551);
-		Card c16 = new Card(cardDatas,cardStrings,cardPics,50755);
-		Card c17 =new Card(cardDatas,cardStrings,cardPics,168917);
-		Card c18 = new Card(cardDatas,cardStrings,cardPics,176392);
-		Card c19 =new Card(cardDatas,cardStrings,cardPics,27551);
-		Card c20 = new Card(cardDatas,cardStrings,cardPics,50755);
-		Card c21 =new Card(cardDatas,cardStrings,cardPics,168917);
-		Card c22 = new Card(cardDatas,cardStrings,cardPics,176392);
-		Card c23 =new Card(cardDatas,cardStrings,cardPics,168917);
+		Card c1 = new Card(cardDatas,cardStrings,cardSmallPics,1);
+		Card c2 =new Card(cardDatas,cardStrings,cardSmallPics,131182);
+		Card c3 = new Card(cardDatas,cardStrings,cardSmallPics,135598);
+		Card c4 =new Card(cardDatas,cardStrings,cardSmallPics,168917);
+		Card c5 = new Card(cardDatas,cardStrings,cardSmallPics,176392);
+		Card c6 = new Card(cardDatas,cardStrings,cardSmallPics,191749);
+		Card c7 = new Card(cardDatas,cardStrings,cardSmallPics,218704);
+		Card c8 =new Card(cardDatas,cardStrings,cardSmallPics,27551);
+		Card c9 = new Card(cardDatas,cardStrings,cardSmallPics,50755);
+		Card c10 = new Card(cardDatas,cardStrings,cardSmallPics,135598);
+		Card c11 =new Card(cardDatas,cardStrings,cardSmallPics,168917);
+		Card c12 = new Card(cardDatas,cardStrings,cardSmallPics,176392);
+		Card c13 = new Card(cardDatas,cardStrings,cardSmallPics,191749);
+		Card c14 = new Card(cardDatas,cardStrings,cardSmallPics,218704);
+		Card c15 =new Card(cardDatas,cardStrings,cardSmallPics,27551);
+		Card c16 = new Card(cardDatas,cardStrings,cardSmallPics,50755);
+		Card c17 =new Card(cardDatas,cardStrings,cardSmallPics,168917);
+		Card c18 = new Card(cardDatas,cardStrings,cardSmallPics,176392);
+		Card c19 =new Card(cardDatas,cardStrings,cardSmallPics,27551);
+		Card c20 = new Card(cardDatas,cardStrings,cardSmallPics,50755);
+		Card c21 =new Card(cardDatas,cardStrings,cardSmallPics,168917);
+		Card c22 = new Card(cardDatas,cardStrings,cardSmallPics,176392);
+		Card c23 =new Card(cardDatas,cardStrings,cardSmallPics,168917);
 		
 		c1.setCardZone(zone_0_remove);
 		player00.getCardsBanish().addCard(c1);
@@ -1184,6 +1261,13 @@ public class YgoView extends ViewGroup implements OnClickListener{
 		player01.setCardsHand( new CardGroup(CARD_HAND_MAX_SIZE ));
 		player01.setCardsMZONE( new CardGroup(CARD_MZONE_MAXSIZE ));
 		player01.setCardsST( new CardGroup(CARD_SZONE_MAXSIZE ));
+	}
+	
+	public void setCardOnShow(Card c){
+		if(c!=null){
+			cardOnShow = c;
+			cardOnShow.setCardPic(cardPics.get(c.getCode()));
+		}
 	}
 	
 	public void sendMessage(String text)

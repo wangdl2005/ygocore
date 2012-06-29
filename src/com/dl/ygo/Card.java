@@ -28,6 +28,10 @@ public class Card {
 	public Bitmap getCardPic(){
 		return cardPic;
 	}
+	public void setCardPic(Bitmap cardPic){
+		this.cardPic = cardPic;
+	}
+	
 	public Rect getRect(){
 		CardLocation loc =getLoc();
 		if(loc == CardLocation.LOCATION_MZONE || loc == CardLocation.LOCATION_SZONE)

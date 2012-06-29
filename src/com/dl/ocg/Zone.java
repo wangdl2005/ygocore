@@ -4,7 +4,7 @@ import android.graphics.Rect;
 
 import com.dl.ocg.Common.CardLocation;
 
-public class Zone {
+public class Zone{
 	private CardLocation loc;
 	private Rect rect;
 	public CardLocation getLoc() {
@@ -25,5 +25,17 @@ public class Zone {
 	}
 	public Zone(CardLocation loc){
 		this.loc = loc;
+	}
+	
+	public boolean isTheSame(Zone another){
+		if(another.getLoc() == loc && 
+				another.getRect().equals(rect))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 }

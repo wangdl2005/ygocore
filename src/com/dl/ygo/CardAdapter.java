@@ -20,7 +20,7 @@ public class CardAdapter extends BaseAdapter{
 	@Override
 	public int getCount() {
 		// TODO Auto-generated method stub
-		return 5;
+		return cards.getCount();
 	}
 
 	@Override
@@ -42,13 +42,14 @@ public class CardAdapter extends BaseAdapter{
 			imgView = new ImageView(context);
 			imgView.setLayoutParams(new GridView.LayoutParams(GridView.LayoutParams.WRAP_CONTENT
 					,GridView.LayoutParams.WRAP_CONTENT));
+			imgView.setScaleType(ImageView.ScaleType.FIT_CENTER);
 			imgView.setPadding(8, 8, 8, 8);
 		}
 		else{
 			imgView = (ImageView) convertView;
 		}
-		//imgView.setImageBitmap(cards.getCards().get(position).getCardPic());
-		imgView.setImageBitmap(BitmapFactory.decodeResource(context.getResources(),R.drawable.ic_m1));
+		imgView.setImageBitmap(cards.getCards().get(position).getCardPic());
+		//imgView.setImageBitmap(BitmapFactory.decodeResource(context.getResources(),R.drawable.ic_m1));
 		return imgView;
 	}
 
