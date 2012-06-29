@@ -1,4 +1,4 @@
-package com.dl.ygo;
+package com.dl.ocg;
 
 public enum Direction {
 	UP,

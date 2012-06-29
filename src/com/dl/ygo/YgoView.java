@@ -28,6 +28,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.text.method.ScrollingMovementMethod;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -35,6 +36,7 @@ import android.view.ViewGroup;
 import android.view.View.OnTouchListener;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -82,8 +84,8 @@ public class YgoView extends ViewGroup implements OnClickListener{
 	private static final int CARD_SZONE_MAXSIZE = 6;
 	private static final int CARD_GRAVE_MAX_SIZE = 75;
 	private static final int CARD_HAND_MAX_SIZE = 75;
-	private static final int smallCardWidth = 38;
-	private static final int smallCardHeight = 54;
+	private static final int SMALL_CARD_WIDTH = 38;
+	private static final int SMALL_CARD_HEIGHT = 54;
 	private static final int LP_MAX = 8000;
 	//坐标，区域
 	/* 1_hand ...
@@ -182,6 +184,8 @@ public class YgoView extends ViewGroup implements OnClickListener{
 	
 	private TextView txtDesc;
 	private TextView txtMessage;
+	
+	private CardsView cardsView;
 
 	private ArrayList<MyButton> buttons = new ArrayList<MyButton>();
 	public YgoView(Context context, AttributeSet attrs) {
@@ -228,8 +232,7 @@ public class YgoView extends ViewGroup implements OnClickListener{
 		buttons.add(btn_token);
 		buttons.add(btn_lp);
 		buttons.add(btn_endTurn);
-		
-		
+							
 		
 		//player 		
 		CardGroup emptyCardGroup = new CardGroup(0);
@@ -242,6 +245,8 @@ public class YgoView extends ViewGroup implements OnClickListener{
 		//cardOnShow = new Card(cardDatas, cardStrings, cardPics, 1);
 		initialCardGroup();
 		test();
+
+		addMyView();		
 	}
 	
 	@Override
@@ -429,21 +434,21 @@ public class YgoView extends ViewGroup implements OnClickListener{
 	    		int top = zone_0_hand.getRect().top;
 	    		int right = zone_0_hand.getRect().right;
 	    		int bottom = zone_0_hand.getRect().bottom;
-	    		int seam = (right-left-smallCardWidth)/(n00-1);
-	    		if(seam > smallCardWidth){
-	    			seam = smallCardWidth +1;
+	    		int seam = (right-left-SMALL_CARD_WIDTH)/(n00-1);
+	    		if(seam > SMALL_CARD_WIDTH){
+	    			seam = SMALL_CARD_WIDTH +1;
 	    		}
 	    		int i = left;
 	    		int n = 0;
 	    		for(Card c : player00.getCardsHand().getCards()){
 	    			++n;
-	    			canvas.drawBitmap(c.getCardPic(), null,new Rect(i, top, i + smallCardWidth, bottom), pen);
+	    			canvas.drawBitmap(c.getCardPic(), null,new Rect(i, top, i + SMALL_CARD_WIDTH, bottom), pen);
 	    			if(n < n00){
 	    				c.setRect(new Rect(i,top,i + seam-1, bottom));	    			
 	    			}
 	    			else
 	    			{
-	    				c.setRect(new Rect(i,top,i + smallCardWidth, bottom));	    
+	    				c.setRect(new Rect(i,top,i + SMALL_CARD_WIDTH, bottom));	    
 	    			}
 	    			 i += seam;
 	    		}
@@ -453,21 +458,21 @@ public class YgoView extends ViewGroup implements OnClickListener{
 	    		int top = zone_1_hand.getRect().top;
 	    		int right = zone_1_hand.getRect().right;
 	    		int bottom = zone_1_hand.getRect().bottom;
-	    		int seam = (right-left-smallCardWidth)/(n01-1);
-	    		if(seam > smallCardWidth){
-	    			seam = smallCardWidth +1;
+	    		int seam = (right-left-SMALL_CARD_WIDTH)/(n01-1);
+	    		if(seam > SMALL_CARD_WIDTH){
+	    			seam = SMALL_CARD_WIDTH +1;
 	    		}
 	    		int i = right;
 	    		int n = 0;
 	    		for(Card c : player01.getCardsHand().getCards()){
 	    			++n;
-	    			canvas.drawBitmap(c.getCardPic(), null,new Rect(i - smallCardWidth, top, i  , bottom), pen);
+	    			canvas.drawBitmap(c.getCardPic(), null,new Rect(i - SMALL_CARD_WIDTH, top, i  , bottom), pen);
 	    			if(n < n01){
 	    				c.setRect(new Rect(i - seam + 1,top,i, bottom));	    			
 	    			}
 	    			else
 	    			{
-	    				c.setRect(new Rect(i -smallCardWidth ,top,i, bottom));	    
+	    				c.setRect(new Rect(i -SMALL_CARD_WIDTH ,top,i, bottom));	    
 	    			}
 	    			 i -= seam;
 	    		}
@@ -561,7 +566,6 @@ public class YgoView extends ViewGroup implements OnClickListener{
 //							//TODO
 //							text.append("\n");
 							text.append(desc);
-							TextView txtDesc = (TextView)findViewById(R.id.txtDesc);
 							txtDesc.setText(text);
 							txtDesc.invalidate();
 							rectInvaliate.add(rect_card_info);
@@ -585,33 +589,13 @@ public class YgoView extends ViewGroup implements OnClickListener{
 
 
 	private void setChildView() {
-		//Buuton
-				btnDp = (ImageButton) findViewById(R.id.btnDp);
-				btnSp = (ImageButton) findViewById(R.id.btnSp);
-				btnM1 = (ImageButton) findViewById(R.id.btnM1);
-				btnBp = (ImageButton) findViewById(R.id.btnBp);
-				btnM2 = (ImageButton) findViewById(R.id.btnM2);
-				btnEp = (ImageButton) findViewById(R.id.btnEp);
-				
-				btnCoin = (ImageButton) findViewById(R.id.btnCoin);
-				btnDice = (ImageButton) findViewById(R.id.btnDice);
-				btnToken = (ImageButton) findViewById(R.id.btnToken);
-				btnLp = (ImageButton) findViewById(R.id.btnLp);
-				btnEndTurn = (ImageButton) findViewById(R.id.btnEndTurn);
-				//TextView
-				txtDesc = (TextView) findViewById(R.id.txtDesc);
-				txtMessage = (TextView) findViewById(R.id.txtMessage);		
-				
-		
 		if(txtDesc!=null)
 		 {
-			 txtDesc.setMovementMethod(ScrollingMovementMethod.getInstance()); 
 			 Rect r1 = rect_desc;
 			 txtDesc.layout(r1.left,r1.top,r1.right,r1.bottom);
 		 }
 		 if(txtMessage!=null)
 		 {
-			 txtMessage.setMovementMethod(ScrollingMovementMethod.getInstance()); 
 			 Rect r1 = rect_message;
 			 txtMessage.layout(r1.left,r1.top,r1.right,r1.bottom);
 		 }		 
@@ -619,95 +603,144 @@ public class YgoView extends ViewGroup implements OnClickListener{
 		 {
 			 Rect r1 = btn_dp.getRect();
 			 btnDp.layout(r1.left,r1.top,r1.right,r1.bottom);
-			 btnDp.setOnClickListener(this);
-			 btnDp.setBackgroundDrawable(getResources().getDrawable(R.drawable.ic_dp));
 		 }
 		 if(btnSp!=null)
 		 {
 			 Rect r1 = btn_sp.getRect();
 			 btnSp.layout(r1.left,r1.top,r1.right,r1.bottom);
-			 btnSp.setOnClickListener(this);
-			 btnSp.setBackgroundDrawable(getResources().getDrawable(R.drawable.ic_sp));
 		 }
 		 if(btnM1!=null)
 		 {
 			 Rect r1 = btn_m1.getRect();
 			 btnM1.layout(r1.left,r1.top,r1.right,r1.bottom);
-			 btnM1.setOnClickListener(this);
-			 btnM1.setBackgroundDrawable(getResources().getDrawable(R.drawable.ic_m1));
 		 }
 		 if(btnBp!=null)
 		 {
 			 Rect r1 = btn_bp.getRect();
 			 btnBp.layout(r1.left,r1.top,r1.right,r1.bottom);
-			 btnBp.setOnClickListener(this);
-			 btnBp.setBackgroundDrawable(getResources().getDrawable(R.drawable.ic_bp));
 		 }
 		 if(btnM2!=null)
 		 {
 			 Rect r1 = btn_m2.getRect();
 			 btnM2.layout(r1.left,r1.top,r1.right,r1.bottom);
-			 btnM2.setOnClickListener(this);
-			 btnM2.setBackgroundDrawable(getResources().getDrawable(R.drawable.ic_m2));
 		 }
 		 if(btnEp!=null)
 		 {
 			 Rect r1 = btn_ep.getRect();
 			 btnEp.layout(r1.left,r1.top,r1.right,r1.bottom);
-			 btnEp.setOnClickListener(this);
-			 btnEp.setBackgroundDrawable(getResources().getDrawable(R.drawable.ic_ep));
 		 }
 		 if(btnCoin!=null)
 		 {
 			 Rect r1 = btn_coin.getRect();
 			 btnCoin.layout(r1.left,r1.top,r1.right,r1.bottom);
-			 btnCoin.setOnClickListener(this);
-			 btnCoin.setBackgroundDrawable(getResources().getDrawable(R.drawable.ic_coin));
 		 }
 		 if(btnDice!=null)
 		 {
 			 Rect r1 = btn_dice.getRect();
 			 btnDice.layout(r1.left,r1.top,r1.right,r1.bottom);
-			 btnDice.setOnClickListener(this);
-			 btnDice.setBackgroundDrawable(getResources().getDrawable(R.drawable.ic_dice));
 		 }
 		 if(btnToken!=null)
 		 {
 			 Rect r1 = btn_token.getRect();
 			 btnToken.layout(r1.left,r1.top,r1.right,r1.bottom);
-			 btnToken.setOnClickListener(this);
-			 btnToken.setBackgroundDrawable(getResources().getDrawable(R.drawable.ic_token));
 		 }
 		 if(btnLp!=null)
 		 {
 			 Rect r1 = btn_lp.getRect();
 			 btnLp.layout(r1.left,r1.top,r1.right,r1.bottom);
-			 btnLp.setOnClickListener(this);
-			 btnLp.setBackgroundDrawable(getResources().getDrawable(R.drawable.ic_lp));
 		 }
 		 if(btnEndTurn!=null)
 		 {
 			 Rect r1 = btn_endTurn.getRect();
 			 btnEndTurn.layout(r1.left,r1.top,r1.right,r1.bottom);
-			 btnEndTurn.setOnClickListener(this);
-			 btnEndTurn.setBackgroundDrawable(getResources().getDrawable(R.drawable.ic_endturn));
 		 }
-//		 
-//		 	addView(btnDp);
-//			addView(btnSp);
-//			addView(btnM1);
-//			addView(btnBp);
-//			addView(btnM2);
-//			addView(btnEp);
-//			
-//			addView(btnCoin);
-//			addView(btnDice);
-//			addView(btnToken);
-//			addView(btnLp);
-//			addView(btnEndTurn);
-//			
-//			addView(txtDesc);
-//			addView(txtMessage);
+
+
+		 if(cardsView != null){
+			cardsView.measure(700, 400);
+			cardsView.layout(0, 0, 700, 400);
+		 }
+	}
+
+
+	private void addMyView() {
+		//Buuton
+		btnDp = new ImageButton(getContext());
+		btnSp = new ImageButton(getContext());
+		btnM1 = new ImageButton(getContext());
+		btnBp = new ImageButton(getContext());
+		btnM2 = new ImageButton(getContext());
+		btnEp = new ImageButton(getContext());
+		
+		btnCoin = new ImageButton(getContext());
+		btnDice = new ImageButton(getContext());
+		btnToken = new ImageButton(getContext());
+		btnLp= new ImageButton(getContext());
+		btnEndTurn = new ImageButton(getContext());
+
+		btnDp.setOnClickListener(this);
+		btnDp.setBackgroundDrawable(getResources().getDrawable(R.drawable.ic_dp));
+		btnSp.setOnClickListener(this);
+		btnSp.setBackgroundDrawable(getResources().getDrawable(R.drawable.ic_sp));
+		btnM1.setOnClickListener(this);
+		btnM1.setBackgroundDrawable(getResources().getDrawable(R.drawable.ic_m1));
+		btnBp.setOnClickListener(this);
+		btnBp.setBackgroundDrawable(getResources().getDrawable(R.drawable.ic_bp));
+		btnM2.setOnClickListener(this);
+		btnM2.setBackgroundDrawable(getResources().getDrawable(R.drawable.ic_m2));
+		btnEp.setOnClickListener(this);
+		btnEp.setBackgroundDrawable(getResources().getDrawable(R.drawable.ic_ep));
+		btnCoin.setOnClickListener(this);
+		btnCoin.setBackgroundDrawable(getResources().getDrawable(R.drawable.ic_coin));
+		btnDice.setOnClickListener(this);
+		btnDice.setBackgroundDrawable(getResources().getDrawable(R.drawable.ic_dice));
+		btnToken.setOnClickListener(this);
+		btnToken.setBackgroundDrawable(getResources().getDrawable(R.drawable.ic_token));
+		btnLp.setOnClickListener(this);
+		btnLp.setBackgroundDrawable(getResources().getDrawable(R.drawable.ic_lp));
+		btnEndTurn.setOnClickListener(this);
+		btnEndTurn.setBackgroundDrawable(getResources().getDrawable(R.drawable.ic_endturn));
+		
+		//TextView
+		txtDesc = new TextView(getContext());
+		txtMessage = new TextView(getContext());
+		
+		txtDesc.setTextColor(Color.BLACK);
+		txtDesc.setTextSize(9.0f);
+		txtDesc.setSingleLine(false);
+		txtDesc.setVerticalScrollBarEnabled(true);
+		txtDesc.setScrollBarStyle(SCROLLBARS_INSIDE_OVERLAY);
+		txtDesc.setMovementMethod(ScrollingMovementMethod.getInstance()); 
+		
+		txtMessage.setTextColor(Color.BLACK);
+		txtMessage.setTextSize(9.0f);
+		txtMessage.setBackgroundColor(Color.GRAY);
+		txtMessage.setSingleLine(false);
+		txtMessage.setVerticalScrollBarEnabled(true);
+		txtMessage.setScrollBarStyle(SCROLLBARS_INSIDE_OVERLAY);
+		txtMessage.setMovementMethod(ScrollingMovementMethod.getInstance()); 
+		
+		//cards view
+		cardsView = new CardsView(getContext(),player00.getCardsDeck());
+	
+		
+	 	addView(btnDp);
+		addView(btnSp);
+		addView(btnM1);
+		addView(btnBp);
+		addView(btnM2);
+		addView(btnEp);
+		
+		addView(btnCoin);
+		addView(btnDice);
+		addView(btnToken);
+		addView(btnLp);
+		addView(btnEndTurn);
+		
+		addView(txtDesc);
+		addView(txtMessage);
+		
+		addView(cardsView);
 	}
 	
 
@@ -1156,7 +1189,6 @@ public class YgoView extends ViewGroup implements OnClickListener{
 	public void sendMessage(String text)
 	{
 		//show on messageBoard
-		TextView txtMessage =(TextView) findViewById(R.id.txtMessage);
 		String txt = "";
 		String message = getTimeNow() + ": player00  " +text + "\n";
 		txtMessage.append(message);
@@ -1167,7 +1199,6 @@ public class YgoView extends ViewGroup implements OnClickListener{
 	{
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		sdf.setTimeZone(TimeZone.getTimeZone("GMT"));		
-		//yyyy.MM.dd HH:mm:ss
 		return sdf.format(new Date());
 	}
 }

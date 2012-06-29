@@ -26,7 +26,12 @@ public class TextUtil {
 	private String mStrText = "";
 	private Vector mString = null;
 	private Paint mPaint = null;
-
+	//run test
+//	   txtUtil = new TextUtil(text, 5, 253,150,22,Color.WHITE, Color.BLACK, 0, 18);
+//    txtUtil.InitText();
+//    txtUtil.DrawText(canvas);
+	
+	
 	public TextUtil(String StrText, int x, int y, int w, int h, int bgcolor,
 			int textcolor, int alpha, int textsize) {
 		mPaint = new Paint();
