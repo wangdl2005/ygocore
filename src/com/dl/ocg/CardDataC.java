@@ -12,7 +12,7 @@ public class CardDataC
 	public int alias;
 	public int setcode;
 	//卡片类型：怪兽。。
-	public CardType type;
+	public int type;
 	//等级
 	public int level;
 	//属性

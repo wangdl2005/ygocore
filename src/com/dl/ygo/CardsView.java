@@ -1,17 +1,25 @@
 package com.dl.ygo;
 
+import com.dl.ocg.Common.CardLocation;
+
 import android.content.Context;
 import android.graphics.Color;
 import android.util.AttributeSet;
+import android.view.ContextMenu;
 import android.view.Gravity;
+import android.view.Menu;
 import android.view.ViewGroup;
 import android.widget.GridView;
+import static com.dl.ocg.Common.*;;
 
 public class CardsView extends GridView {
 	private CardGroup cards = null;
 	public void setCards(CardGroup cards){
 		this.cards = cards;
-		this.setAdapter(new CardAdapter(getContext(), cards));
+		this.setAdapter(new CardsAdapter(getContext(), cards));
+	}
+	public CardGroup getCards(){
+		return cards;
 	}
 	
 	public CardsView(Context context, AttributeSet attrs) {
@@ -25,7 +33,7 @@ public class CardsView extends GridView {
 		this.setColumnWidth(50);
 		this.setStretchMode(GridView.NO_STRETCH);
 		//this.setGravity(Gravity.CENTER);
-		this.setAdapter(new CardAdapter(context, cards));
+		this.setAdapter(new CardsAdapter(context, cards));
 		this.setBackgroundColor(Color.LTGRAY);
 	}
 	
@@ -41,9 +49,10 @@ public class CardsView extends GridView {
 		this.setColumnWidth(50);
 		this.setStretchMode(GridView.NO_STRETCH);
 		//this.setGravity(Gravity.CENTER);
-		this.setAdapter(new CardAdapter(context, cards));
+		this.setAdapter(new CardsAdapter(context, cards));
 		this.setBackgroundColor(Color.LTGRAY);
 	}	
+	
 	
 	
 }

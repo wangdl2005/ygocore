@@ -1,8 +1,70 @@
 package com.dl.ocg;
 
+import android.view.Menu;
+
 
 
 public final class Common {
+	
+	//数据库。。常量
+	public static final String TAG = "YGO";
+	public static final int CARD_DECK_MAX_SIZE = 60;
+	public static final int CARD_EXTRA_MAX_SIZE = 15;
+	public static final int CARD_BANISH_MAX_SIZE = 75;
+	public static final int CARD_MZONE_MAXSIZE = 5;
+	public static final int CARD_SZONE_MAXSIZE = 6;
+	public static final int CARD_GRAVE_MAX_SIZE = 75;
+	public static final int CARD_HAND_MAX_SIZE = 75;
+	public static final int SMALL_CARD_WIDTH = 38;
+	public static final int SMALL_CARD_HEIGHT = 54;
+	public static final int LP_MAX = 8000;
+	//context menu
+	public static final int CONTEXT_MENU_REVEAL = Menu.FIRST + 0;
+	public static final int CONTEXT_MENU_TO_DECK_BOTTOM= Menu.FIRST +  1;
+	public static final int CONTEXT_MENU_TO_DECK_TOP = Menu.FIRST +  2;
+	public static final int CONTEXT_MENU_TO_GRAY = Menu.FIRST +  3;
+	public static final int CONTEXT_MENU_TO_BANISH = Menu.FIRST +  4;
+	public static final int CONTEXT_MENU_TO_BANISH_SET = Menu.FIRST +  5;
+	public static final int CONTEXT_MENU_TO_EXTRA = Menu.FIRST +  6;
+	public static final int CONTEXT_MENU_TO_S_T = Menu.FIRST +  7;
+	public static final int CONTEXT_MENU_TO_MZONE = Menu.FIRST +  8;
+	public static final int CONTEXT_MENU_TO_HAND = Menu.FIRST +  9;
+	public static final int CONTEXT_MENU_SS_DEF = Menu.FIRST +  10;
+	public static final int CONTEXT_MENU_SS_ATK = Menu.FIRST +  11;
+	public static final int CONTEXT_MENU_NORMAL_SUMMON_ATK = Menu.FIRST +  12;
+	public static final int CONTEXT_MENU_SET = Menu.FIRST +  13;
+	public static final int CONTEXT_MENU_ACTIVATE = Menu.FIRST +  14;
+	public static final int CONTEXT_MENU_OVERLAY = Menu.FIRST +  15;
+	public static final int CONTEXT_MENU_OVERLAY_ATK = Menu.FIRST +  16;
+	public static final int CONTEXT_MENU_OVERLAY_DEF = Menu.FIRST +  17;
+	public static final int CONTEXT_MENU_CHANGE_CONTROL = Menu.FIRST +  18;
+	public static final int CONTEXT_MENU_TO_ATK = Menu.FIRST +  19;
+	public static final int CONTEXT_MENU_TO_DEF = Menu.FIRST +  20;
+	public static final int CONTEXT_MENU_REMOVE = Menu.FIRST +  21;//token 专用
+	
+	public static final String STRING_REVEAL = "Reveal";
+	public static final String STRING_TO_DECK_BOTTOM= "To B.Deck";
+	public static final String STRING_TO_DECK_TOP = "To T.Deck";
+	public static final String STRING_TO_GRAY = "To Gray";
+	public static final String STRING_TO_BANISH = "Banish";
+	public static final String STRING_TO_BANISH_SET = "Banish Set";
+	public static final String STRING_TO_EXTRA = "To Extra";
+	public static final String STRING_TO_S_T = "To S/T";
+	public static final String STRING_TO_MZONE = "To MZONE";
+	public static final String STRING_TO_HAND = "To Hand";
+	public static final String STRING_SS_DEF = "S.S. DEF";
+	public static final String STRING_SS_ATK = "S.S. ATK";
+	public static final String STRING_NORMAL_SUMMON_ATK = "N.S. ATK";
+	public static final String STRING_SET = "Set";
+	public static final String STRING_ACTIVATE = "Activate";
+	public static final String STRING_OVERLAY = "Overlay";
+	public static final String STRING_OVERLAY_ATK ="O.L. ATK";
+	public static final String STRING_OVERLAY_DEF = "O.L. DEF";
+	public static final String STRING_CHANGE_CONTROL = "Change CTRL";
+	public static final String STRING_TO_ATK = "To ATK";
+	public static final String STRING_TO_DEF = "To DEF";
+	public static final String STRING_REMOVE = "Remove";
+	
 	//卡片位置：牌组、手牌、怪兽区、魔陷区、墓地、除外、额外、叠放
 	public enum CardLocation{
 		LOCATION_DECK(0x01),

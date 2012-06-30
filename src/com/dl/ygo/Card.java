@@ -70,6 +70,10 @@ public class Card {
 		return cardDesc;
 	}
 	
+	public String getType(){
+		return FormatType(cardDataC.type);
+	}
+	
 	public CardLocation getLoc(){
 		return this.cardZone.getLoc();
 	}

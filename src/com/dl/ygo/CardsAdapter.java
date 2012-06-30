@@ -10,11 +10,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class CardAdapter extends BaseAdapter{
+public class CardsAdapter extends BaseAdapter{
 
 	private CardGroup cards;
 	private Context context;
-	public CardAdapter(Context context,CardGroup cards){
+	public CardsAdapter(Context context,CardGroup cards){
 		this.context = context;
 		this.cards = cards;
 	}

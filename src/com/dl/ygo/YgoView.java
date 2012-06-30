@@ -29,15 +29,21 @@ import android.graphics.drawable.BitmapDrawable;
 import android.text.method.ScrollingMovementMethod;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnTouchListener;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
@@ -51,6 +57,7 @@ import com.dl.ocg.Common.CardLocation;
 import com.dl.ocg.Common.CardRace;
 import com.dl.ocg.Common.CardType;
 import com.dl.ygo.*;
+import static com.dl.ocg.Common.*;;
 
 
 
@@ -77,20 +84,9 @@ public class YgoView extends ViewGroup implements OnClickListener{
 	private HashMap<Integer,CardString> cardStrings = new HashMap<Integer, CardString>();
 	private HashMap<Integer,String> counterStrings = new HashMap<Integer, String>();
 	private HashMap<Integer,String> victoryStrings = new HashMap<Integer, String>();
-	private HashMap<Integer,String> sysStrings = new HashMap<Integer, String>();
+	private HashMap<Integer,String> sysStrings = new HashMap<Integer, String>();	
 	
-	//数据库。。常量
-	private static final String TAG = "YGO";
-	private static final int CARD_DECK_MAX_SIZE = 60;
-	private static final int CARD_EXTRA_MAX_SIZE = 15;
-	private static final int CARD_BANISH_MAX_SIZE = 75;
-	private static final int CARD_MZONE_MAXSIZE = 5;
-	private static final int CARD_SZONE_MAXSIZE = 6;
-	private static final int CARD_GRAVE_MAX_SIZE = 75;
-	private static final int CARD_HAND_MAX_SIZE = 75;
-	private static final int SMALL_CARD_WIDTH = 38;
-	private static final int SMALL_CARD_HEIGHT = 54;
-	private static final int LP_MAX = 8000;
+	
 	//坐标，区域
 	/* 1_hand ...
 	 * 1_deck    1_szone_4 1_szone_3 1_szone_2 1_szone_1 1_szone_0 1_extra
@@ -193,6 +189,8 @@ public class YgoView extends ViewGroup implements OnClickListener{
 	
 	private CardsView cardsView;
 	private boolean isEnabledCardsView = false;
+	
+	private static float lastX, lastY;  
 
 	private ArrayList<MyButton> buttons = new ArrayList<MyButton>();
 	public YgoView(Context context, AttributeSet attrs) {
@@ -200,13 +198,13 @@ public class YgoView extends ViewGroup implements OnClickListener{
 		// TODO Auto-generated constructor stub
 		setWillNotDraw(false);
 		init();
-		
 	}
 
 
 	public YgoView(Context context) {
 		super(context);
 		// TODO Auto-generated constructor stub
+		
 	}
 	
 	private void init() {
@@ -292,6 +290,7 @@ public class YgoView extends ViewGroup implements OnClickListener{
 		    String race = cardOnShow.getRace();
 		    String desc = cardOnShow.getDesc();
 		    String loc = FormatLocation(cardOnShow.getLoc().getValue());
+		    String type = cardOnShow.getType();
 		    String text = null;
 		    TextUtil txtUtil = null;
 		    //name
@@ -312,8 +311,8 @@ public class YgoView extends ViewGroup implements OnClickListener{
 		    txtUtil = new TextUtil(text, 5, 290, 150, 15, Color.WHITE, Color.BLACK, 0, 12);
 		    txtUtil.InitText();
 		    txtUtil.DrawText(canvas);
-		    //race
-		    text = "[" + race + "]";
+		    //race type
+		    text = "[" + race + "]    "  + type;
 		    Log.d(TAG,"race:"+race);
 		    txtUtil = new TextUtil(text, 5, 305, 150, 15, Color.WHITE, Color.BLACK, 0, 12);
 		    txtUtil.InitText();
@@ -325,8 +324,8 @@ public class YgoView extends ViewGroup implements OnClickListener{
 		    txtUtil = new TextUtil(text, 5, 320, 150, 15, Color.WHITE, Color.BLACK, 0, 12);
 		    txtUtil.InitText();
 		    txtUtil.DrawText(canvas);
-		    //TODO counter
-		    text = "指示物:  " + "0";
+		    //TODO counter 
+		    text = "指示物:  " + "0     " ;
 		    Log.d(TAG,text);
 		    txtUtil = new TextUtil(text, 5, 335, 150, 15, Color.WHITE, Color.BLACK, 0, 12);
 		    txtUtil.InitText();
@@ -543,7 +542,165 @@ public class YgoView extends ViewGroup implements OnClickListener{
 	    canvas.restore();
 		super.onDraw(canvas);
 	}
-
+	
+	
+	//根据坐标（x,y），设置contextMenu
+	private void setContextMenu(ContextMenu menu,Card c){
+		if(isEnabledCardsView == false){
+			if(c!=null){
+				switch(c.getLoc()){
+					case LOCATION_HAND:{
+						if(c.getType().contains("怪物")){
+							menu.setHeaderTitle("手牌怪物");
+							menu.add(Menu.NONE,CONTEXT_MENU_REVEAL,Menu.NONE,STRING_REVEAL);
+							menu.add(Menu.NONE,CONTEXT_MENU_TO_S_T,Menu.NONE,STRING_TO_S_T);
+							menu.add(Menu.NONE,CONTEXT_MENU_TO_DECK_BOTTOM,Menu.NONE,STRING_TO_DECK_BOTTOM);
+							menu.add(Menu.NONE,CONTEXT_MENU_TO_BANISH,Menu.NONE,STRING_TO_BANISH);
+							menu.add(Menu.NONE,CONTEXT_MENU_TO_DECK_TOP,Menu.NONE,STRING_TO_DECK_TOP);
+							menu.add(Menu.NONE,CONTEXT_MENU_TO_GRAY,Menu.NONE,STRING_TO_GRAY);
+							menu.add(Menu.NONE,CONTEXT_MENU_SS_ATK,Menu.NONE,STRING_SS_ATK);
+							menu.add(Menu.NONE,CONTEXT_MENU_SS_DEF,Menu.NONE,STRING_SS_DEF);
+							menu.add(Menu.NONE,CONTEXT_MENU_SET,Menu.NONE,STRING_SET);
+							menu.add(Menu.NONE,CONTEXT_MENU_NORMAL_SUMMON_ATK,Menu.NONE,STRING_NORMAL_SUMMON_ATK);
+						}
+						if(c.getType().contains("魔法")){
+							menu.setHeaderTitle("手牌魔法");
+							menu.add(Menu.NONE,CONTEXT_MENU_REVEAL,Menu.NONE,STRING_REVEAL);
+							menu.add(Menu.NONE,CONTEXT_MENU_ACTIVATE,Menu.NONE,STRING_ACTIVATE);
+							menu.add(Menu.NONE,CONTEXT_MENU_TO_DECK_BOTTOM,Menu.NONE,STRING_TO_DECK_BOTTOM);
+							menu.add(Menu.NONE,CONTEXT_MENU_TO_BANISH,Menu.NONE,STRING_TO_BANISH);
+							menu.add(Menu.NONE,CONTEXT_MENU_TO_DECK_TOP,Menu.NONE,STRING_TO_DECK_TOP);
+							menu.add(Menu.NONE,CONTEXT_MENU_TO_GRAY,Menu.NONE,STRING_TO_GRAY);
+							menu.add(Menu.NONE,CONTEXT_MENU_SET,Menu.NONE,STRING_SET);
+						}
+						if(c.getType().contains("陷阱")){
+							menu.setHeaderTitle("手牌陷阱");
+							menu.add(Menu.NONE,CONTEXT_MENU_REVEAL,Menu.NONE,STRING_REVEAL);
+							menu.add(Menu.NONE,CONTEXT_MENU_TO_DECK_BOTTOM,Menu.NONE,STRING_TO_DECK_BOTTOM);
+							menu.add(Menu.NONE,CONTEXT_MENU_TO_BANISH,Menu.NONE,STRING_TO_BANISH);
+							menu.add(Menu.NONE,CONTEXT_MENU_TO_DECK_TOP,Menu.NONE,STRING_TO_DECK_TOP);
+							menu.add(Menu.NONE,CONTEXT_MENU_TO_GRAY,Menu.NONE,STRING_TO_GRAY);
+							menu.add(Menu.NONE,CONTEXT_MENU_SET,Menu.NONE,STRING_SET);						
+						}
+						break;
+					}
+					case LOCATION_MZONE:{
+						if(c.getType().contains("怪物")){
+							//TODO token
+							//普通
+							menu.setHeaderTitle("怪物");
+							menu.add(Menu.NONE,CONTEXT_MENU_TO_HAND,Menu.NONE,STRING_TO_HAND);
+							menu.add(Menu.NONE,CONTEXT_MENU_TO_S_T,Menu.NONE,STRING_TO_S_T);
+							menu.add(Menu.NONE,CONTEXT_MENU_TO_DECK_BOTTOM,Menu.NONE,STRING_TO_DECK_BOTTOM);
+							menu.add(Menu.NONE,CONTEXT_MENU_TO_BANISH,Menu.NONE,STRING_TO_BANISH);
+							menu.add(Menu.NONE,CONTEXT_MENU_TO_DECK_TOP,Menu.NONE,STRING_TO_DECK_TOP);
+							menu.add(Menu.NONE,CONTEXT_MENU_TO_GRAY,Menu.NONE,STRING_TO_GRAY);
+							menu.add(Menu.NONE,CONTEXT_MENU_TO_DEF,Menu.NONE,STRING_TO_DEF);
+							menu.add(Menu.NONE,CONTEXT_MENU_SET,Menu.NONE,STRING_SET);
+							menu.add(Menu.NONE,CONTEXT_MENU_OVERLAY,Menu.NONE,STRING_OVERLAY);
+							menu.add(Menu.NONE,CONTEXT_MENU_CHANGE_CONTROL,Menu.NONE,STRING_CHANGE_CONTROL);
+						}
+						if(c.getType().contains("魔法")){
+							
+						}
+						if(c.getType().contains("陷阱")){
+							
+						}
+						break;
+					}
+					case LOCATION_SZONE:{
+						if(c.getType().contains("怪物")){
+							
+						}
+						if(c.getType().contains("魔法")){
+							
+						}
+						if(c.getType().contains("陷阱")){
+							
+						}
+						break;
+					}
+					case LOCATION_OVERLAY:{
+						if(c.getType().contains("怪物")){
+							
+						}
+						if(c.getType().contains("魔法")){
+							
+						}
+						if(c.getType().contains("陷阱")){
+							
+						}
+						break;
+					}
+				}
+			}
+		}
+		else{
+			if(c!=null){
+				switch(c.getLoc()){
+					case LOCATION_DECK:{
+						if(c.getType().contains("怪物")){
+							menu.setHeaderTitle("Deck怪物");
+							menu.add(Menu.NONE,CONTEXT_MENU_REVEAL,Menu.NONE,STRING_REVEAL);
+							menu.add(Menu.NONE,CONTEXT_MENU_TO_S_T,Menu.NONE,STRING_TO_S_T);
+							menu.add(Menu.NONE,CONTEXT_MENU_TO_DECK_BOTTOM,Menu.NONE,STRING_TO_DECK_BOTTOM);
+							menu.add(Menu.NONE,CONTEXT_MENU_TO_BANISH,Menu.NONE,STRING_TO_BANISH);
+							menu.add(Menu.NONE,CONTEXT_MENU_TO_DECK_TOP,Menu.NONE,STRING_TO_DECK_TOP);
+							menu.add(Menu.NONE,CONTEXT_MENU_TO_GRAY,Menu.NONE,STRING_TO_GRAY);
+							menu.add(Menu.NONE,CONTEXT_MENU_SS_ATK,Menu.NONE,STRING_SS_ATK);
+							menu.add(Menu.NONE,CONTEXT_MENU_SS_DEF,Menu.NONE,STRING_SS_DEF);
+							menu.add(Menu.NONE,CONTEXT_MENU_SET,Menu.NONE,STRING_SET);
+							menu.add(Menu.NONE,CONTEXT_MENU_NORMAL_SUMMON_ATK,Menu.NONE,STRING_NORMAL_SUMMON_ATK);
+						}
+						if(c.getType().contains("魔法")){
+							
+						}
+						if(c.getType().contains("陷阱")){
+							
+						}
+						break;
+					}
+					case LOCATION_EXTRA:{
+						if(c.getType().contains("怪物")){
+							
+						}
+						if(c.getType().contains("魔法")){
+							
+						}
+						if(c.getType().contains("陷阱")){
+							
+						}
+						break;
+					}
+					case LOCATION_REMOVED:{
+						if(c.getType().contains("怪物")){
+							
+						}
+						if(c.getType().contains("魔法")){
+							
+						}
+						if(c.getType().contains("陷阱")){
+							
+						}
+						break;
+					}
+					case LOCATION_GRAVE:{
+						if(c.getType().contains("怪物")){
+							
+						}
+						if(c.getType().contains("魔法")){
+							
+						}
+						if(c.getType().contains("陷阱")){
+							
+						}
+						break;
+					}
+				}
+			}
+		}
+	}
+	
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		// TODO Auto-generated method stub		
@@ -554,70 +711,68 @@ public class YgoView extends ViewGroup implements OnClickListener{
 		{
 			case MotionEvent.ACTION_DOWN:
 		    {
-		    		//cardsOnShow
-					cardOnShow = getCard(selX,selY);
-					if(cardOnShow != null)
+	    		lastX = selX;  
+	            lastY = selY;  
+	    		//cardsOnShow
+				cardOnShow = getCard(selX,selY);
+				if(cardOnShow != null)
+				{
+						setCardOnShow(cardOnShow);
+						//txtDesc.invalidate();
+						rectInvaliate.add(rect_card_info);
+						rectInvaliate.add(zone_on_show.getRect());
+				}
+				//extra,grave,deck,remove
+				Zone z = getZone(selX, selY);
+				if(z != null){
+					if(z.isTheSame(zone_0_deck)){
+						isEnabledCardsView = true;
+						cardsView.setCards(player00.getCardsDeck());
+						cardsView.setEnabled(true);
+						cardsView.setVisibility(VISIBLE);
+					}else if(z.isTheSame(zone_0_extra))
 					{
-							setCardOnShow(cardOnShow);
-						    String desc = cardOnShow.getDesc();
-							StringBuilder text = new StringBuilder();
-							text.append(desc);
-							txtDesc.setText(text);
-							txtDesc.invalidate();
-							rectInvaliate.add(rect_card_info);
-							rectInvaliate.add(zone_on_show.getRect());
+						isEnabledCardsView = true;
+						cardsView.setCards(player00.getCardsExtra());
+						cardsView.setEnabled(true);
+						cardsView.setVisibility(VISIBLE);
+					}else if(z.isTheSame(zone_0_grave))
+					{
+						isEnabledCardsView = true;
+						cardsView.setCards(player00.getCardsGrave());
+						cardsView.setEnabled(true);
+						cardsView.setVisibility(VISIBLE);
+					}else if(z.isTheSame(zone_0_remove))
+					{
+						isEnabledCardsView = true;
+						cardsView.setCards(player00.getCardsBanish());
+						cardsView.setEnabled(true);
+						cardsView.setVisibility(VISIBLE);
+					}else if(z.isTheSame(zone_1_deck)){
+						isEnabledCardsView = true;
+						cardsView.setCards(player01.getCardsDeck());
+						cardsView.setEnabled(true);
+						cardsView.setVisibility(VISIBLE);
+					}else if(z.isTheSame( zone_1_extra))
+					{
+						isEnabledCardsView = true;
+						cardsView.setCards(player01.getCardsExtra());
+						cardsView.setEnabled(true);
+						cardsView.setVisibility(VISIBLE);
+					}else if(z.isTheSame(zone_1_grave))
+					{
+						isEnabledCardsView = true;
+						cardsView.setCards(player01.getCardsGrave());
+						cardsView.setEnabled(true);
+						cardsView.setVisibility(VISIBLE);
+					}else if(z.isTheSame(zone_1_remove))
+					{
+						isEnabledCardsView = true;
+						cardsView.setCards(player01.getCardsBanish());
+						cardsView.setEnabled(true);
+						cardsView.setVisibility(VISIBLE);
 					}
-					//extra,grave,deck,remove
-					Zone z = getZone(selX, selY);
-					if(z != null){
-						if(z.isTheSame(zone_0_deck)){
-							isEnabledCardsView = true;
-							cardsView.setCards(player00.getCardsDeck());
-							cardsView.setEnabled(true);
-							cardsView.setVisibility(VISIBLE);
-						}else if(z.isTheSame(zone_0_extra))
-						{
-							isEnabledCardsView = true;
-							cardsView.setCards(player00.getCardsExtra());
-							cardsView.setEnabled(true);
-							cardsView.setVisibility(VISIBLE);
-						}else if(z.isTheSame(zone_0_grave))
-						{
-							isEnabledCardsView = true;
-							cardsView.setCards(player00.getCardsGrave());
-							cardsView.setEnabled(true);
-							cardsView.setVisibility(VISIBLE);
-						}else if(z.isTheSame(zone_0_remove))
-						{
-							isEnabledCardsView = true;
-							cardsView.setCards(player00.getCardsBanish());
-							cardsView.setEnabled(true);
-							cardsView.setVisibility(VISIBLE);
-						}else if(z.isTheSame(zone_1_deck)){
-							isEnabledCardsView = true;
-							cardsView.setCards(player01.getCardsDeck());
-							cardsView.setEnabled(true);
-							cardsView.setVisibility(VISIBLE);
-						}else if(z.isTheSame( zone_1_extra))
-						{
-							isEnabledCardsView = true;
-							cardsView.setCards(player01.getCardsExtra());
-							cardsView.setEnabled(true);
-							cardsView.setVisibility(VISIBLE);
-						}else if(z.isTheSame(zone_1_grave))
-						{
-							isEnabledCardsView = true;
-							cardsView.setCards(player01.getCardsGrave());
-							cardsView.setEnabled(true);
-							cardsView.setVisibility(VISIBLE);
-						}else if(z.isTheSame(zone_1_remove))
-						{
-							isEnabledCardsView = true;
-							cardsView.setCards(player01.getCardsBanish());
-							cardsView.setEnabled(true);
-							cardsView.setVisibility(VISIBLE);
-						}
-					}
+				}
 			}
         }        		
 		for(Rect r : rectInvaliate){
@@ -644,6 +799,13 @@ public class YgoView extends ViewGroup implements OnClickListener{
 		 return super.onKeyDown(keyCode, event);
 	}
 
+	@Override
+	protected void onCreateContextMenu(ContextMenu menu) {
+		Card c = getCard(lastX,lastY );
+		setContextMenu(menu, c);
+		super.onCreateContextMenu(menu);
+	}
+	
 	private void setChildView() {
 		if(txtDesc!=null)
 		 {
@@ -785,10 +947,37 @@ public class YgoView extends ViewGroup implements OnClickListener{
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
 				// TODO Auto-generated method stub
-				setCardOnShow((Card) parent.getItemAtPosition(position));
+				setCardOnShow((Card) parent.getItemAtPosition(position));				
 				YgoView.this.invalidate(rect_card_info);
 				YgoView.this.invalidate(zone_on_show.getRect());
 			}
+		});
+		cardsView.setOnItemLongClickListener(new OnItemLongClickListener() {
+
+			@Override
+			public boolean onItemLongClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				final int pos = position;
+				View.OnCreateContextMenuListener listener = new OnCreateContextMenuListener() {
+					
+					@Override
+					public void onCreateContextMenu(ContextMenu menu, View v,
+							ContextMenuInfo menuInfo) {
+						// TODO Auto-generated method stub
+						AdapterView.AdapterContextMenuInfo info;
+                        try {
+                             info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+                        } catch (ClassCastException e) {
+                            return;
+                        }
+                		Card c = cardsView.getCards().getCards().get(pos);
+                        setContextMenu(menu, c);
+					}
+				};
+				cardsView.setOnCreateContextMenuListener(listener);
+				return false;
+			}
+			
 		});
 		cardsView.setEnabled(false);
 		cardsView.setVisibility(INVISIBLE);
@@ -944,7 +1133,7 @@ public class YgoView extends ViewGroup implements OnClickListener{
 			cd.ot = cursor.getInt(1);
 			cd.alias = cursor.getInt(2);
 			cd.setcode = cursor.getInt(3);
-			cd.type = CardType.toCardType(cursor.getInt(4));
+			cd.type = cursor.getInt(4);
 			cd.attack = cursor.getInt(5);
 			cd.defence = cursor.getInt(6);
 			cd.level = cursor.getInt(7);
@@ -1267,13 +1456,16 @@ public class YgoView extends ViewGroup implements OnClickListener{
 		if(c!=null){
 			cardOnShow = c;
 			cardOnShow.setCardPic(cardPics.get(c.getCode()));
+		    String desc = cardOnShow.getDesc();
+			StringBuilder text = new StringBuilder();
+			text.append(desc);
+			txtDesc.setText(text);
 		}
 	}
 	
 	public void sendMessage(String text)
 	{
 		//show on messageBoard
-		String txt = "";
 		String message = getTimeNow() + ": player00  " +text + "\n";
 		txtMessage.append(message);
 		//send message to player01

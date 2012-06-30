@@ -13,6 +13,8 @@ public class YgocoreActivity extends Activity {
         setContentView(R.layout.main);
 //        CardsView v = new CardsView(this, new CardGroup(40));
 //        setContentView(v);
+        
+        registerForContextMenu(findViewById(R.id.ygoview));
 		/**全屏设置，隐藏窗口所有装饰*/  
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,   
 		WindowManager.LayoutParams.FLAG_FULLSCREEN);  
